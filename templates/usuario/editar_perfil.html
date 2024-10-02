@@ -36,7 +36,7 @@
                     </div>
                 </div>
                 <!-- Botones de Acción -->
-                <div class="text-center mt-5">
+                <div class="text-end mt-5">
                     <a href="{% url 'perfil' %}" class="btn px-4 py-2 shadow-sm" style="background-color: #2C3E50; color: #fff; font-weight: bold;">Cancelar</a>
                     <button type="submit" class="btn px-4 py-2 shadow-sm" style="background-color: #4CAF50; color: #fff; font-weight: bold;">Guardar Cambios</button>
                 </div>
@@ -57,7 +57,7 @@
                     </div>
                 </div>
                 <!-- Botones de Acción -->
-                <div class="text-center mt-5">
+                <div class="text-end mt-5">
                     <a href="{% url 'perfil' %}" class="btn px-4 py-2 shadow-sm" style="background-color: #2C3E50; color: #fff; font-weight: bold;">Cancelar</a>
                     <button type="submit" class="btn px-4 py-2 shadow-sm" style="background-color: #4CAF50; color: #fff; font-weight: bold;" onclick="handleFormSubmit()">Actualizar Imagen</button>
                 </div>
@@ -87,6 +87,7 @@
                     </div>
                 </div>
                 <div class="text-end mt-4">
+                    <a href="{% url 'perfil' %}" class="btn px-4 py-2 shadow-sm" style="background-color: #2C3E50; color: #fff; font-weight: bold;">Cancelar</a>
                     <button type="submit" class="btn px-4 py-2 shadow-sm" style="background-color: #4CAF50; color: #fff; font-weight: bold;">Actualizar Contraseña</button>
                 </div>
                 {% if error2 %}
