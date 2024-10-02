@@ -1,0 +1,44 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+
+<main class="container py-4">
+    <div class="d-flex justify-content-center align-items-center">
+        <div class="card p-4 shadow-lg" style="max-width: 600px; width: 100%; border-radius: 15px; background-color: #f5f5f5;">
+            <div class="text-center">
+                <h1 class="mb-4" style="color: #4CAF50; font-size: 1.75rem; font-weight: 900; letter-spacing: 2px;">Mi Perfil</h1>
+                <!-- Imagen del perfil -->
+                <a class="d-flex justify-content-center align-items-center overflow-hidden rounded-circle mx-auto mb-3"
+                style="width: 200px; height: 200px; background-size: cover; background-position: center; background-image: url({% if user.imagen %} {{ user.imagen.url }} {% else %} 'https://imgur.com/CuXg45K.jpg' {% endif %});"
+                aria-label="Imagen de perfil"></a>
+                <!-- Nombre del usuario -->
+                <h4 class="text-center" style="font-size: 1.75rem; font-weight: bold; letter-spacing: 2px; color: #F1C40F;">{{ user.nombre }} {{ user.apellidos }}</h4>
+            </div>
+            <!-- Información del usuario -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="mb-3">
+                        <label for="staticDni" class="form-label" style="font-weight: bold; color: #F1C40F;">DNI:</label>
+                        <input type="text" readonly class="form-control shadow-sm" id="staticDni" value="{{ user.dni }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="staticEmail" class="form-label" style="font-weight: bold; color: #F1C40F;">Correo:</label>
+                        <input type="text" readonly class="form-control shadow-sm" id="staticEmail" value="{{ user.email }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="staticCelular" class="form-label" style="font-weight: bold; color: #F1C40F;">Celular:</label>
+                        <input type="text" readonly class="form-control shadow-sm" id="staticCelular" value="{{ user.celular }}">
+                    </div>
+                </div>
+            </div>
+            <!-- Botón para editar información -->
+            <div class="text-center mt-4">
+                <a class="btn w-100 btn px-4 py-2 shadow-sm" href="{% url 'editar_perfil' %}" style="background-color: #2C3E50; color: #fff; font-weight: bold;">
+                    Editar Información
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+{% endblock %}

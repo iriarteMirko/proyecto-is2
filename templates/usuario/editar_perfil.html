@@ -1,0 +1,200 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+
+<main class="container py-5">
+    <div class="d-flex justify-content-center">
+        <div class="card shadow-lg p-4" style="max-width: 800px; width: 100%; background-color: #f5f5f5; border-radius: 15px;">
+            <h2 class="text-center mb-4" style="color: #4CAF50; font-weight: bold;">Editar Perfil</h2>
+            <form method="POST" action="{% url 'actualizar_perfil' %}">
+                {% csrf_token %}
+                <!-- Información Personal -->
+                <div class="mb-4">
+                    <h4 style="color: #2C3E50; font-weight: bold;">Información Personal</h4>
+                </div>
+                <!-- Campos de Información -->
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="dni" class="form-label" style="font-weight: bold; color: #F1C40F;">DNI:</label>
+                        <input type="text" name="dni" id="dni" value="{{ user.dni }}" class="form-control form-control-lg shadow-sm" maxlength="8" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="email" class="form-label" style="font-weight: bold; color: #F1C40F;">Correo:</label>
+                        <input type="email" name="email" id="email" value="{{ user.email }}" class="form-control form-control-lg shadow-sm" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="nombre" class="form-label" style="font-weight: bold; color: #F1C40F;">Nombre:</label>
+                        <input type="text" name="nombre" id="nombre" value="{{ user.nombre }}" class="form-control form-control-lg shadow-sm" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="apellidos" class="form-label" style="font-weight: bold; color: #F1C40F;">Apellidos:</label>
+                        <input type="text" name="apellidos" id="apellidos" value="{{ user.apellidos }}" class="form-control form-control-lg shadow-sm" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="celular" class="form-label" style="font-weight: bold; color: #F1C40F;">Celular:</label>
+                        <input type="text" name="celular" id="celular" value="{{ user.celular }}" class="form-control form-control-lg shadow-sm" maxlength="9" required>
+                    </div>
+                </div>
+                <!-- Botones de Acción -->
+                <div class="text-center mt-5">
+                    <a href="{% url 'perfil' %}" class="btn px-4 py-2 shadow-sm" style="background-color: #2C3E50; color: #fff; font-weight: bold;">Cancelar</a>
+                    <button type="submit" class="btn px-4 py-2 shadow-sm" style="background-color: #4CAF50; color: #fff; font-weight: bold;">Guardar Cambios</button>
+                </div>
+            </form>
+
+            <!-- Sección para cambiar la imagen -->
+            <hr class="my-5">
+            <h4 style="color: #2C3E50; font-weight: bold;" class="mb-3">Cambiar Imagen de Perfil</h4>
+            <form method="POST" action="{% url 'cambiar_imagen' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="d-flex align-items-center mb-3">
+                    <a id="profileImageLink" class="rounded-circle" 
+                    style="width: 200px; height: 200px; background-size: cover; background-position: center; background-image: url({% if user.imagen %} {{ user.imagen.url }} {% else %} 'https://imgur.com/CuXg45K.jpg' {% endif %});"></a>
+                    <div class="ps-3">
+                        <label for="profileImageInput" class="btn btn-outline-primary">Subir nueva imagen</label>
+                        <input type="file" id="profileImageInput" name="imagen" accept="image/*" style="display: none;" onchange="previewImage(event)">
+                        <button type="button" class="btn btn-outline-danger" onclick="setDefaultImage(event)">Quitar imagen</button>
+                    </div>
+                </div>
+                <!-- Botones de Acción -->
+                <div class="text-center mt-5">
+                    <a href="{% url 'perfil' %}" class="btn px-4 py-2 shadow-sm" style="background-color: #2C3E50; color: #fff; font-weight: bold;">Cancelar</a>
+                    <button type="submit" class="btn px-4 py-2 shadow-sm" style="background-color: #4CAF50; color: #fff; font-weight: bold;" onclick="handleFormSubmit()">Actualizar Imagen</button>
+                </div>
+                {% if error1 %}
+                <h5 class="text-center mt-3" style="color:red">{{ error1 }}</h5>
+                {% endif %}
+            </form>
+
+            <!-- Sección para cambiar la contraseña -->
+            <hr class="my-5">
+            <h4 style="color: #2C3E50; font-weight: bold;" class="mb-3">Cambiar Contraseña</h4>
+            <form method="POST" action="{% url 'cambiar_contrasena' %}">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="password" class="form-label" style="font-weight: bold; color: #F1C40F;">Contraseña Actual:</label>
+                        <input type="password" name="password" id="password" class="form-control form-control-lg shadow-sm">
+                    </div>
+                    <div class="col-md-6"></div>
+                    <div class="col-md-6">
+                        <label for="new_password" class="form-label" style="font-weight: bold; color: #F1C40F;">Nueva Contraseña:</label>
+                        <input type="password" name="new_password" id="new_password" class="form-control form-control-lg shadow-sm">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="confirm_password" class="form-label" style="font-weight: bold; color: #F1C40F;">Confirmar Nueva Contraseña:</label>
+                        <input type="password" name="confirm_password" id="confirm_password" class="form-control form-control-lg shadow-sm">
+                    </div>
+                </div>
+                <div class="text-end mt-4">
+                    <button type="submit" class="btn px-4 py-2 shadow-sm" style="background-color: #4CAF50; color: #fff; font-weight: bold;">Actualizar Contraseña</button>
+                </div>
+                {% if error2 %}
+                <div class="toast-container position-fixed top-0 end-0 pt-5 mt-5">
+                    <div id="liveToast2" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+                        <div class="toast-header">
+                            <svg class="bd-placeholder-img rounded me-2" width="20" height="20" aria-hidden="false">
+                                <rect width="100%" height="100%" fill="#ff2c2c"></rect>
+                            </svg>
+                            <strong class="me-auto">Error de validación de contraseña</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body" style="color:red">
+                            {{ error2 }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </form>
+
+            <!-- Sección para eliminar cuenta -->
+            <hr class="my-5">
+            <h4 style="color: #2C3E50; font-weight: bold;" class="mb-3">Eliminar Cuenta</h4>
+            <form method="POST" action="{% url 'eliminar_cuenta' %}">
+                {% csrf_token %}
+                <div class="alert alert-warning" role="alert">
+                    <i class="ai-triangle-alert fs-xl me-2"></i>
+                    <strong>Advertencia:</strong> Al eliminar tu cuenta, se perderán todos tus datos y no podrás recuperarlos. 
+                    <br>¿Estás seguro de que deseas continuar?
+                </div>
+                <div class="form-check mb-4">
+                    <input type="checkbox" class="form-check-input" id="confirm" required>
+                    <label for="confirm" class="form-check-label">Sí, deseo eliminar mi cuenta.</label>
+                </div>
+                <div class="text-end">
+                    <button type="submit" class="btn btn-danger px-4 py-2 shadow-sm" style="color: #fff; font-weight: bold;">Eliminar Cuenta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<script>
+    // Funciones para los mensajes de error
+    document.addEventListener("DOMContentLoaded", function() {
+        var errorExists = "{{ error }}" !== "";
+        var error2Exists = "{{ error2 }}" !== "";
+        if (errorExists) {
+            var toastEl = document.getElementById("liveToast");
+            var toast = new bootstrap.Toast(toastEl, { delay: 5000 });
+            toast.show();
+        }
+        if (error2Exists) {
+            var toastEl2 = document.getElementById("liveToast2");
+            var toast2 = new bootstrap.Toast(toastEl2, { delay: 5000 });
+            toast2.show();
+        }
+    });
+
+    // Funciones para la imagen de perfil
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        // Validar el tipo de archivo
+        const validImageTypes = ["image/jpeg", "image/jpg", "image/png"];
+        if (!validImageTypes.includes(file.type)) {
+            alert("Solo se permiten archivos PNG o JPG.");
+            event.target.value = ""; // Limpiar el input
+            return;
+        }
+        // Validar el tamaño del archivo
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+            alert("El archivo no debe ser mayor a 5MB.");
+            event.target.value = ""; // Limpiar el input
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(){
+            const output = document.getElementById("profileImageLink");
+            output.style.backgroundImage = `url(${reader.result})`;
+        }
+        reader.readAsDataURL(file);
+    }
+
+    // Función para restablecer a la imagen predeterminada
+    function setDefaultImage(event) {
+        event.preventDefault();
+        const defaultImageUrl = "https://imgur.com/CuXg45K.jpg";
+        const output = document.getElementById("profileImageLink");
+        output.style.backgroundImage = `url(${defaultImageUrl})`;
+        document.getElementById("profileImageInput").value = ""; // Limpia el input
+    }
+
+    function handleFormSubmit() {
+        const fileInput = document.getElementById("profileImageInput");
+        if (!fileInput.value) {
+            // Si no hay una imagen seleccionada, limpia el input para evitar cambiar la imagen
+            fileInput.name = "";
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const profileImageLink = document.getElementById("profileImageLink");
+        if (!profileImageLink.style.backgroundImage || profileImageLink.style.backgroundImage === "none") {
+            profileImageLink.style.backgroundImage = "url(https://imgur.com/CuXg45K.jpg)";
+        }
+    });
+</script>
+
+{% endblock %}
