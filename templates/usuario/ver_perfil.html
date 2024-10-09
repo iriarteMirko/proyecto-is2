@@ -14,10 +14,10 @@
                             <img src="{% if user.imagen %} {{ user.imagen.url }} {% else %} https://imgur.com/CuXg45K.jpg {% endif %}" 
                             class="rounded-circle img-fluid mb-3" alt="{{ user.nombre }} {{ user.apellidos }}" style="width: 150px; height: 150px;">
                             <h4>{{ user.nombre }} {{ user.apellidos }}</h4>
-                            {% if user.es_estudiante %}
-                                <span class="badge bg-primary">Estudiante</span>
-                            {% elif user.es_profesor %}
-                                <span class="badge bg-primary">Profesor</span>
+                            {% if responsable %}
+                                <span class="badge bg-success">Responsable</span>
+                            {% else %}
+                                <span class="badge bg-primary">Cliente</span>
                             {% endif %}
                         </div>
                     </div>
@@ -29,50 +29,31 @@
                             <h4>Información Personal</h4>
                             <p><strong>Nombre:</strong> {{ user.nombre }}</p>
                             <p><strong>Apellidos:</strong> {{ user.apellidos }}</p>
-                            <p><strong>Código:</strong> {{ user.codigo }}</p>
                             <p><strong>Correo:</strong> {{ user.email }}</p>
-                            {% if user.es_estudiante %}
-                                <p><strong>Carrera:</strong> {{ estudiante.carrera }}</p>
-                                <p class="mb-0"><strong>Ciclo:</strong> {{ estudiante.ciclo }}</p>
-                            {% elif user.es_profesor %}
-                                <p><strong>Profesión:</strong> {{ profesor.profesion }}</p>
-                                <p class="mb-0"><strong>Centro laboral:</strong> {{ profesor.centro_laboral }}</p>
-                            {% endif %}
+                            <p><strong>Teléfono:</strong> {{ user.celular }}</p>
+                            <p><strong>DNI:</strong> {{ user.dni }}</p>
                         </div>
                     </div>
+
+                    {% if responsable %}
                     <div class="card">
                         <div class="card-body">
-                            {% if user.es_estudiante %}
-                                <h4>Cursos Inscritos</h4>
-                                <ul class="list-group">
-                                    {% if inscripciones %}
-                                        {% for inscripcion in inscripciones %}
-                                            <li class="list-group-item d-flex justify-content-between align-items-center text-truncate">
-                                                {{ inscripcion.curso.nombre }}
-                                                <a href="{% url 'informacion_curso' inscripcion.curso.id inscripcion.curso.slug %}" class="btn btn-primary btn-sm">Ver curso</a>
-                                            </li>
-                                        {% endfor %}
-                                    {% else %}
-                                        <li class="list-group-item text-truncate">No tiene cursos inscritos</li>
-                                    {% endif %}
-                                </ul>
-                            {% elif user.es_profesor %}
-                                <h4>Cursos Creados</h4>
-                                <ul class="list-group">
-                                    {% if cursos %}
-                                        {% for curso in cursos %}
-                                            <li class="list-group-item d-flex justify-content-between align-items-center text-truncate">
-                                                {{ curso.nombre }}
-                                                <a href="{% url 'informacion_curso' curso.id curso.slug %}" class="btn btn-primary btn-sm">Ver curso</a>
-                                            </li>
-                                        {% endfor %}
-                                    {% else %}
-                                        <li class="list-group-item text-truncate">No tiene cursos creados</li>
-                                    {% endif %}
-                                </ul>
-                            {% endif %}
+                            <h4>Canchas a Cargo</h4>
+                            <ul class="list-group">
+                                {% if user.canchas.exists %}
+                                    {% for cancha in user.canchas.all %}
+                                        <li class="list-group-item">
+                                            {{ cancha.nombre }} - {{ cancha.ubicacion }}
+                                            <!-- Sin enlace a detalle de cancha ya que aún no hay vistas -->
+                                        </li>
+                                    {% endfor %}
+                                {% else %}
+                                    <li class="list-group-item">No tiene canchas a cargo</li>
+                                {% endif %}
+                            </ul>
                         </div>
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
