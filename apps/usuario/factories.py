@@ -14,18 +14,10 @@ class CanchaFactory(ABC):
 class CanchaConcreteFactory(CanchaFactory):
     def create_cancha(self, nombre, ubicacion, usuario):
         try:
-            cancha = Cancha.objects.create(
-                nombre=nombre,
-                ubicacion=ubicacion,
-                responsable=usuario
-            )
-            
-            # Actualizar el grupo del usuario a "Responsable"
-            self._asignar_grupo_responsable(usuario)
-            
+            cancha = Cancha.objects.create(nombre=nombre, ubicacion=ubicacion, responsable=usuario)
+            self._asignar_grupo_responsable(usuario) # Separar la lógica de asignación de grupos en un método privado
             return cancha
         except Exception as e:
-            # Registrar el error con el logger
             logger.error(f"Error al crear la cancha: {str(e)}")
             return None
     
