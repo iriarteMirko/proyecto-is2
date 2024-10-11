@@ -2,13 +2,12 @@ from django.urls import path, include
 from rest_framework import routers
 from . import views
 
-# Versionado de la API
 router = routers.DefaultRouter()
 router.register(r'usuarios', views.UsuarioViewSet)
 
 urlpatterns = [
     # Rutas relacionadas con la API REST
-    path('api/v1/', include(router.urls)),
+    path('api/', include(router.urls)),
     # Rutas generales
     path('', views.inicio, name='inicio'),
     path('signup/', views.signup, name='signup'),

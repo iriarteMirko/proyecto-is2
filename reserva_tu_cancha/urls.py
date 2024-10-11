@@ -9,6 +9,7 @@ urlpatterns = [
     path('', include('apps.usuario.urls')),
     path('usuario/', include('apps.usuario.urls')),
     path('cancha/', include('apps.cancha.urls')),
+    path('direccion/', include('apps.direccion.urls')),
 ]
 
 if settings.DEBUG:
