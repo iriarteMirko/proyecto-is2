@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import Direccion
 
 class DireccionAdmin(admin.ModelAdmin):
-    list_display = ['tipo_calle', 'nombre_calle', 'numero_calle', 'distrito', 'cancha']
+    list_display = ['cancha', 'tipo_calle', 'nombre_calle', 'numero_calle', 'distrito']
     search_fields = ['nombre_calle', 'numero_calle', 'distrito']
     list_filter = ['distrito', 'tipo_calle']
     

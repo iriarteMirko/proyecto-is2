@@ -7,4 +7,3 @@ class DireccionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Direccion
         fields = ['id', 'tipo_calle', 'nombre_calle', 'numero_calle', 'distrito', 'distrito_display', 'referencia', 'cancha']
-        read_only_fields = ['cancha']  # Cancha será solo de lectura, ya que se asignará cuando se cree la cancha.

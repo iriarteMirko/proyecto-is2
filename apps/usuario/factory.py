@@ -1,7 +1,8 @@
 import logging
 from abc import ABC, abstractmethod
-from apps.cancha.models import Cancha
 from apps.usuario.models import Usuario
+from apps.cancha.models import Cancha
+from apps.direccion.models import Direccion
 from django.contrib.auth.models import Group
 
 logger = logging.getLogger(__name__)
@@ -9,6 +10,10 @@ logger = logging.getLogger(__name__)
 class CanchaFactory(ABC):
     @abstractmethod
     def create_cancha(self, nombre, usuario):
+        pass
+    
+    @abstractmethod
+    def create_direccion(self, tipo_calle, nombre_calle, numero_calle, distrito, referencia, cancha):
         pass
 
 class CanchaConcreteFactory(CanchaFactory):
@@ -29,3 +34,17 @@ class CanchaConcreteFactory(CanchaFactory):
         if cliente_group in usuario.groups.all():
             usuario.groups.remove(cliente_group)
             usuario.groups.add(responsable_group)
+    
+    def create_direccion(self, tipo_calle, nombre_calle, numero_calle, distrito, referencia, cancha):
+        try:
+            Direccion.objects.create(
+                tipo_calle=tipo_calle,
+                nombre_calle=nombre_calle,
+                numero_calle=numero_calle,
+                distrito=distrito,
+                referencia=referencia,
+                cancha=cancha
+            )
+        except Exception as e:
+            logger.error(f"Error al crear la dirección: {str(e)}")
+            return None

@@ -25,7 +25,6 @@
             </p>
         </div>
     </div>
-
     <!-- Barra de búsqueda de canchas -->
     <div class="container mt-4">
         <div class="row justify-content-center mb-5">
@@ -36,53 +35,34 @@
                 </form>
             </div>
         </div>
-        
-        <!-- Sección de canchas mejor valoradas -->
+        <!-- Sección de canchas registradas -->
         <div class="row">
             <div class="col-lg-12 text-center mb-4">
-                <h2 class="display-5" style="color: #4CAF50;">¡Descubre Nuestras Canchas de Futbol Mejor Valoradas!</h2>
+                <h2 class="display-5" style="color: #4CAF50;">¡Descubre Nuestras Canchas de Futbol Registradas!</h2>
             </div>
         </div>
-        
         <div class="row g-3">
-            <!-- Primera cancha -->
-            <div class="col-md-4">
-                <div class="card">
-                    <img src="{% static 'images/cancha1.jpg' %}" class="card-img-top" alt="Cancha 1">
-                    <div class="card-body">
-                        <h5 class="card-title">Excelente cancha</h5>
-                        <p class="card-text">"Excelente estado del césped y muy buena iluminación nocturna."</p>
-                        <p><strong>Leo Messi</strong> - 07/07/2024</p>
-                        <p class="text-warning">★★★★★</p>
+            {% if canchas %}
+                <!-- Iterar sobre las canchas registradas -->
+                {% for cancha in canchas %}
+                    <div class="col-md-4">
+                        <div class="card">
+                            <img src="{% static 'images/cancha-banner.jpg' %}" class="card-img-top" alt="Cancha {{ cancha.nombre }}">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ cancha.nombre }}</h5>
+                                <p class="card-text">"Ubicación: {{ cancha.direccion.tipo_calle }} {{ cancha.direccion.nombre_calle }} {{ cancha.direccion.numero_calle }}, {{ cancha.direccion.get_distrito_display }}."</p>
+                                <p class="text-warning">Disponible: {{ cancha.disponibilidad|yesno:"Sí,No" }}</p>
+                            </div>
+                        </div>
                     </div>
+                {% endfor %}
+            {% else %}
+                <!-- Mostrar mensaje si no hay canchas registradas -->
+                <div class="col-lg-12 text-center">
+                    <p class="fs-4 text-muted">Aún no existen canchas registradas.</p>
                 </div>
-            </div>
-            <!-- Segunda cancha -->
-            <div class="col-md-4">
-                <div class="card">
-                    <img src="{% static 'images/cancha2.jpg' %}" class="card-img-top" alt="Cancha 2">
-                    <div class="card-body">
-                        <h5 class="card-title">10 de 10, Cerca a mi casa.</h5>
-                        <p class="card-text">"Instalaciones limpias y bien mantenidas, perfecto para jugar."</p>
-                        <p><strong>Cristiano Ronaldo</strong> - 17/04/2024</p>
-                        <p class="text-warning">★★★★★</p>
-                    </div>
-                </div>
-            </div>
-            <!-- Tercera cancha -->
-            <div class="col-md-4">
-                <div class="card">
-                    <img src="{% static 'images/cancha3.jpg' %}" class="card-img-top" alt="Cancha 3">
-                    <div class="card-body">
-                        <h5 class="card-title">Perfectamente balanceada como todo debería ser</h5>
-                        <p class="card-text">"Gran ubicación y fácil de reservar, definitivamente volveremos."</p>
-                        <p><strong>Thanos Quispe</strong> - 21/12/2039</p>
-                        <p class="text-warning">★★★★★</p>
-                    </div>
-                </div>
-            </div>
+            {% endif %}
         </div>
-        
         <!-- Nueva sección para los botones de registro e inicio de sesión -->
         {% if not request.user.is_authenticated %}
         <div class="container my-5 py-5 d-flex justify-content-center" style="background-color: #ECF0F1; border-radius: 15px; max-width: 900px; margin: 0 auto;">
@@ -108,7 +88,6 @@
             </div>
         </div>
         {% endif %}
-        
         <!-- Nueva sección: Registro de Cancha -->
         {% if request.user.is_authenticated %}
         <div class="container my-5 py-5 d-flex justify-content-center" style="background-color: #ECF0F1; border-radius: 15px; max-width: 900px; margin: 0 auto;">

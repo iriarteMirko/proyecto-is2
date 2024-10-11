@@ -2,8 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from apps.usuario.factories import CanchaConcreteFactory
-from apps.direccion.models import Direccion
+from apps.usuario.factory import CanchaConcreteFactory
 from .serializer import CanchaSerializer
 from .models import Cancha
 
@@ -26,15 +25,14 @@ def registro_cancha(request):
         distrito = request.POST.get('distrito')
         referencia = request.POST.get('referencia', '')
         
-        # Usar la fábrica para crear la cancha
-        cancha_factory = CanchaConcreteFactory()
-        cancha = cancha_factory.create_cancha(
+        # Usar la fábrica para crear la cancha con su dirección
+        factory = CanchaConcreteFactory()
+        cancha = factory.create_cancha(
             nombre=nombre,
             usuario=request.user
         )
-        
         if cancha:
-            Direccion.objects.create(
+            direccion = factory.create_direccion(
                 tipo_calle=tipo_calle,
                 nombre_calle=nombre_calle,
                 numero_calle=numero_calle,
@@ -42,8 +40,10 @@ def registro_cancha(request):
                 referencia=referencia,
                 cancha=cancha
             )
-            return redirect('inicio')
+            if direccion:
+                return redirect('inicio')
+            else:
+                return render(request, 'cancha/registro_cancha.html', {'error': 'Error al registrar la dirección. Intente nuevamente.'})
         else:
             return render(request, 'cancha/registro_cancha.html', {'error': 'Error al crear la cancha. Intente nuevamente.'})
-    
     return render(request, 'cancha/registro_cancha.html')

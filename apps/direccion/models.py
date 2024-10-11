@@ -33,14 +33,12 @@ class Direccion(models.Model):
         ('villa_maria_del_triunfo', 'Villa María del Triunfo')
     ]
     
+    cancha = models.ForeignKey(Cancha, on_delete=models.CASCADE, related_name='direccion')
     tipo_calle = models.CharField('Tipo de Calle', max_length=20, choices=TIPOS_CALLE, blank=False, null=False)
     nombre_calle = models.CharField('Nombre de la Calle', max_length=50, blank=False, null=False)
     numero_calle = models.CharField('Número de la Calle', max_length=5, blank=False, null=False)
     distrito = models.CharField('Distrito', max_length=50, choices=DISTRITOS, blank=False, null=False)
-    referencia = models.CharField('Referencia', max_length=255, blank=True, null=True, help_text="Punto de referencia opcional")
-    
-    # Relación uno a uno con la cancha
-    cancha = models.OneToOneField(Cancha, on_delete=models.CASCADE, related_name='direccion')
+    referencia = models.CharField('Referencia', max_length=50, blank=True, null=True, help_text="Punto de referencia opcional")
     
     def __str__(self):
         return f'{self.tipo_calle} {self.nombre_calle}, Nro {self.numero_calle}, {self.get_distrito_display()}'

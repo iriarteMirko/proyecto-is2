@@ -2,7 +2,6 @@ from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
 from django.contrib.auth.models import Group
-from apps.direccion.models import Direccion
 
 class Cancha(models.Model):
     nombre = models.CharField('Nombre de la cancha', max_length=100, blank=False, null=False)
@@ -12,7 +11,6 @@ class Cancha(models.Model):
     slug = models.SlugField(max_length=100, unique=True, blank=True)
     
     responsable = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='canchas')
-    direccion = models.OneToOneField(Direccion, on_delete=models.CASCADE, related_name='cancha', blank=False, null=False)
     
     class Meta:
         verbose_name = 'Cancha'

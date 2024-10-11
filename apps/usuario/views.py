@@ -17,7 +17,12 @@ class UsuarioViewSet(viewsets.ModelViewSet):
 
 # Vista para la página de inicio
 def inicio(request):
-    return render(request, 'usuario/inicio.html')
+    from apps.cancha.models import Cancha
+    canchas = Cancha.objects.all()
+    contexto = {
+        'canchas': canchas
+    }
+    return render(request, 'usuario/inicio.html', contexto)
 
 
 # Registro de usuarios (formulario de signup)
@@ -25,11 +30,9 @@ def signup(request):
     if request.method == 'POST':
         form = RegistroUsuarioForm(request.POST)
         if form.is_valid():
-            # Guardar el usuario
             form.save()
             email = form.cleaned_data.get('email')
             password = form.cleaned_data.get('password1')
-            # Autenticar al usuario y loguearlo
             user = authenticate(email=email, password=password)
             if user is not None:
                 login(request, user)
@@ -52,7 +55,6 @@ def signin(request):
         user = authenticate(request, username=email, password=password)
         if user is not None:
             login(request, user)
-            # Si el usuario es staff, redirigir al admin
             if user.is_staff:
                 return redirect(reverse('admin:index'))
             return redirect('inicio')
@@ -81,7 +83,6 @@ def mi_perfil(request):
 def ver_perfil(request, usuario_id, usuario_slug):
     user = get_object_or_404(Usuario, id=usuario_id, slug=usuario_slug)
     contexto = {'user': user}
-    # Mostrar si es responsable, de lo contrario es cliente
     if user.is_responsible:
         contexto['responsable'] = user
     return render(request, 'usuario/ver_perfil.html', contexto)
@@ -93,7 +94,6 @@ def editar_perfil(request):
     return render(request, 'usuario/editar_perfil.html')
 
 
-# Validar datos comunes al actualizar perfil
 def validar_datos(request, user):
     email = request.POST.get('email')
     dni = request.POST.get('dni')
@@ -104,7 +104,6 @@ def validar_datos(request, user):
     if not (email, dni, nombre, apellidos, celular):
         return None, 'Datos no válidos. Intente nuevamente.'
     
-    # Validaciones específicas
     if len(dni) != 8 or not dni.isdigit():
         return None, 'El DNI debe tener 8 dígitos numéricos.'
     if len(celular) != 9 or not celular.isdigit():
@@ -112,7 +111,6 @@ def validar_datos(request, user):
     
     User = get_user_model()
     
-    # Verificar si los datos ya están en uso por otro usuario
     if email != user.email and User.objects.filter(email=email).exists():
         return None, 'El correo ingresado ya está en uso.'
     if dni != user.dni and User.objects.filter(dni=dni).exists():
@@ -137,7 +135,6 @@ def actualizar_perfil(request):
         if error:
             contexto = {'error': error, 'user': user}
             return render(request, 'usuario/editar_perfil.html', contexto)
-        # Actualizar los datos
         user.email = datos_comunes['email']
         user.dni = datos_comunes['dni']
         user.nombre = datos_comunes['nombre']
