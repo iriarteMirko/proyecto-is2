@@ -9,5 +9,6 @@ router.register(r'canchas', views.CanchaViewSet)
 urlpatterns = [
     # Rutas relacionadas con la API REST
     path('api/v1/', include(router.urls)),
+    path('registro-cancha/', views.registro_cancha, name='registro_cancha'),
     
 ]

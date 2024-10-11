@@ -15,7 +15,7 @@ class CanchaConcreteFactory(CanchaFactory):
     def create_cancha(self, nombre, ubicacion, usuario):
         try:
             cancha = Cancha.objects.create(nombre=nombre, ubicacion=ubicacion, responsable=usuario)
-            self._asignar_grupo_responsable(usuario) # Separar la lógica de asignación de grupos en un método privado
+            self._asignar_grupo_responsable(usuario)
             return cancha
         except Exception as e:
             logger.error(f"Error al crear la cancha: {str(e)}")

@@ -6,7 +6,7 @@ from django.contrib.auth.models import Group
 class Cancha(models.Model):
     nombre = models.CharField('Nombre de la cancha', max_length=100, blank=False, null=False)
     ubicacion = models.CharField('Ubicación', max_length=255, blank=False, null=False)
-    disponibilidad = models.BooleanField('Disponible', default=True, blank=False, null=False)
+    disponibilidad = models.BooleanField('Disponible', default=False, blank=False, null=False)
     fecha_creacion = models.DateField(auto_now_add=True)
     ultima_modificacion = models.DateField(auto_now=True)
     slug = models.SlugField(max_length=100, unique=True, blank=True)
