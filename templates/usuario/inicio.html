@@ -50,8 +50,9 @@
                             <img src="{% static 'images/cancha-banner.jpg' %}" class="card-img-top" alt="Cancha {{ cancha.nombre }}">
                             <div class="card-body">
                                 <h5 class="card-title">{{ cancha.nombre }}</h5>
-                                <p class="card-text">"Ubicación: {{ cancha.direccion.tipo_calle }} {{ cancha.direccion.nombre_calle }} {{ cancha.direccion.numero_calle }}, {{ cancha.direccion.get_distrito_display }}."</p>
+                                <p class="card-text">"Ubicación: {{ cancha.direccion.tipo_calle }} {{ cancha.direccion.nombre_calle }} {{ cancha.direccion.numero_calle }}, {{ cancha.direccion.distrito }}."</p>
                                 <p class="text-warning">Disponible: {{ cancha.disponibilidad|yesno:"Sí,No" }}</p>
+                                <p class="text-muted">Responsable: {{cancha.responsable}}</p>
                             </div>
                         </div>
                     </div>

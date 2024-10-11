@@ -41,7 +41,7 @@ class Direccion(models.Model):
     referencia = models.CharField('Referencia', max_length=50, blank=True, null=True, help_text="Punto de referencia opcional")
     
     def __str__(self):
-        return f'{self.tipo_calle} {self.nombre_calle}, Nro {self.numero_calle}, {self.get_distrito_display()}'
+        return f'{self.tipo_calle} {self.nombre_calle} {self.numero_calle}, {self.distrito}'
     
     class Meta:
         verbose_name = 'Dirección'

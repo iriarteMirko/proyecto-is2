@@ -40,10 +40,10 @@ def registro_cancha(request):
                 referencia=referencia,
                 cancha=cancha
             )
+            print(direccion)
             if direccion:
                 return redirect('inicio')
             else:
                 return render(request, 'cancha/registro_cancha.html', {'error': 'Error al registrar la dirección. Intente nuevamente.'})
-        else:
-            return render(request, 'cancha/registro_cancha.html', {'error': 'Error al crear la cancha. Intente nuevamente.'})
+        return render(request, 'cancha/registro_cancha.html', {'error': 'Error al crear la cancha. Intente nuevamente.'})
     return render(request, 'cancha/registro_cancha.html')
