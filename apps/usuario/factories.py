@@ -8,13 +8,13 @@ logger = logging.getLogger(__name__)
 
 class CanchaFactory(ABC):
     @abstractmethod
-    def create_cancha(self, nombre, ubicacion, usuario):
+    def create_cancha(self, nombre, usuario):
         pass
 
 class CanchaConcreteFactory(CanchaFactory):
-    def create_cancha(self, nombre, ubicacion, usuario):
+    def create_cancha(self, nombre, usuario):
         try:
-            cancha = Cancha.objects.create(nombre=nombre, ubicacion=ubicacion, responsable=usuario)
+            cancha = Cancha.objects.create(nombre=nombre, responsable=usuario)
             self._asignar_grupo_responsable(usuario)
             return cancha
         except Exception as e:
