@@ -23,7 +23,7 @@ def registro_cancha(request):
         nombre_calle = request.POST.get('nombre_calle')
         numero_calle = request.POST.get('numero_calle')
         distrito = request.POST.get('distrito')
-        referencia = request.POST.get('referencia', '')
+        referencia = request.POST.get('referencia')
         
         # Usar la fábrica para crear la cancha con su dirección
         factory = CanchaConcreteFactory()
@@ -33,14 +33,13 @@ def registro_cancha(request):
         )
         if cancha:
             direccion = factory.create_direccion(
+                cancha=cancha,
                 tipo_calle=tipo_calle,
                 nombre_calle=nombre_calle,
                 numero_calle=numero_calle,
                 distrito=distrito,
                 referencia=referencia,
-                cancha=cancha
             )
-            print(direccion)
             if direccion:
                 return redirect('inicio')
             else:

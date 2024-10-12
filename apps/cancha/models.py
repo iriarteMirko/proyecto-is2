@@ -4,13 +4,12 @@ from django.utils.text import slugify
 from django.contrib.auth.models import Group
 
 class Cancha(models.Model):
+    responsable = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='canchas')
     nombre = models.CharField('Nombre de la cancha', max_length=100, blank=False, null=False)
     disponibilidad = models.BooleanField('Disponible', default=False, blank=False, null=False)
     fecha_creacion = models.DateField(auto_now_add=True)
     ultima_modificacion = models.DateField(auto_now=True)
     slug = models.SlugField(max_length=100, unique=True, blank=True)
-    
-    responsable = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='canchas')
     
     class Meta:
         verbose_name = 'Cancha'

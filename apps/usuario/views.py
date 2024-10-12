@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
-from django.utils.text import slugify
 from django.urls import reverse
 from rest_framework import viewsets
 from .serializer import UsuarioSerializer
@@ -19,11 +18,11 @@ class UsuarioViewSet(viewsets.ModelViewSet):
 # Vista para la página de inicio
 def inicio(request):
     from apps.cancha.models import Cancha
-    canchas = Cancha.objects.all()
+    canchas = Cancha.objects.prefetch_related('direcciones').all()
     contexto = {
         'canchas': canchas
     }
-    return render(request, 'usuario/inicio.html', contexto)
+    return render(request, 'usuario/inicio/inicio.html', contexto)
 
 
 # Registro de usuarios (formulario de signup)
@@ -51,8 +50,8 @@ def signup(request):
 # Inicio de sesión
 def signin(request):
     if request.method == 'POST':
-        email = request.POST['email']
-        password = request.POST['password']
+        email = request.POST.get('email')
+        password = request.POST.get('password')
         user = authenticate(request, username=email, password=password)
         if user is not None:
             login(request, user)

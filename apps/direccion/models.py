@@ -33,7 +33,7 @@ class Direccion(models.Model):
         ('villa_maria_del_triunfo', 'Villa María del Triunfo')
     ]
     
-    cancha = models.ForeignKey(Cancha, on_delete=models.CASCADE, related_name='direccion')
+    cancha = models.ForeignKey(Cancha, on_delete=models.CASCADE, related_name='direcciones')
     tipo_calle = models.CharField('Tipo de Calle', max_length=20, choices=TIPOS_CALLE, blank=False, null=False)
     nombre_calle = models.CharField('Nombre de la Calle', max_length=50, blank=False, null=False)
     numero_calle = models.CharField('Número de la Calle', max_length=5, blank=False, null=False)

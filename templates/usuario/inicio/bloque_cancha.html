@@ -1,0 +1,23 @@
+{% load static %}
+
+<div class="col-md-4">
+    <div class="card shadow-lg">
+        <img src="{% static 'images/cancha-banner.jpg' %}" class="card-img-top" alt="Cancha {{ cancha.nombre }}">
+        <div class="card-body">
+            <h5 class="card-title">{{ cancha.nombre }}</h5>
+            {% with direccion=cancha.direcciones.first %}
+                <p class="card-text">
+                    <strong>Dirección:</strong>
+                    {{ direccion.tipo_calle }} {{ direccion.nombre_calle }} 
+                    {{ direccion.numero_calle }}, {{ direccion.get_distrito_display }}.
+                </p>
+            {% endwith %}
+            <p class="card-text">
+                <strong>Responsable:</strong> {{ cancha.responsable }}
+            </p>
+            <p class="text-warning">
+                <strong>Disponible:</strong> {{ cancha.disponibilidad|yesno:"Sí,No" }}
+            </p>
+        </div>
+    </div>
+</div>

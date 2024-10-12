@@ -35,16 +35,17 @@ class CanchaConcreteFactory(CanchaFactory):
             usuario.groups.remove(cliente_group)
             usuario.groups.add(responsable_group)
     
-    def create_direccion(self, tipo_calle, nombre_calle, numero_calle, distrito, referencia, cancha):
+    def create_direccion(self, cancha, tipo_calle, nombre_calle, numero_calle, distrito, referencia):
         try:
-            Direccion.objects.create(
+            direccion = Direccion.objects.create(
+                cancha=cancha,
                 tipo_calle=tipo_calle,
                 nombre_calle=nombre_calle,
                 numero_calle=numero_calle,
                 distrito=distrito,
                 referencia=referencia,
-                cancha=cancha
             )
+            return direccion
         except Exception as e:
             logger.error(f"Error al crear la dirección: {str(e)}")
             return None
