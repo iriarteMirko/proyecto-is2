@@ -69,23 +69,13 @@ def signout(request):
     return redirect('signin')
 
 
-# Vista de perfil de usuario
-@login_required
-def mi_perfil(request):
-    user = request.user
-    contexto = {'user': user}
-    if user.is_responsible:
-        contexto['responsable'] = user
-    return render(request, 'usuario/perfil.html', contexto)
-
-
-# Ver el perfil de otro usuario
-def ver_perfil(request, usuario_id, usuario_slug):
+# Ver el perfil de usuarios
+def perfil(request, usuario_id, usuario_slug):
     user = get_object_or_404(Usuario, id=usuario_id, slug=usuario_slug)
     contexto = {'user': user}
     if user.is_responsible:
         contexto['responsable'] = user
-    return render(request, 'usuario/ver_perfil.html', contexto)
+    return render(request, 'usuario/perfil.html', contexto)
 
 
 # Lleva a la vista de edición de perfil

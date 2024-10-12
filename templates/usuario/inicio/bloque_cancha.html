@@ -22,7 +22,7 @@
                 <h5 class="card-title text-center mb-3" style="font-weight: 900; letter-spacing: 2px; color: #4CAF50;">{{ cancha.nombre }}</h5>
                 <p class="card-text">
                     <strong>Responsable:</strong> 
-                    <a href="{% url 'ver_perfil' usuario_id=cancha.responsable.id usuario_slug=cancha.responsable.slug %}" 
+                    <a href="{% url 'perfil' cancha.responsable.id cancha.responsable.slug %}" 
                         class="text-decoration-none fw text-primary d-inline-flex align-items-center">
                         <span class="me-1" style="color: #4CAF50;">{{ cancha.responsable }}</span>
                         <i class="bi bi-person-circle" style="color: #4CAF50;"></i>
