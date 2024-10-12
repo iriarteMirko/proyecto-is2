@@ -81,7 +81,7 @@ def perfil(request, usuario_id, usuario_slug):
 # Lleva a la vista de edición de perfil
 @login_required
 def editar_perfil(request):
-    return render(request, 'usuario/editar_perfil.html')
+    return render(request, 'usuario/editar_perfil/editar_perfil.html')
 
 
 def validar_datos(request, user):
@@ -124,7 +124,7 @@ def actualizar_perfil(request):
         datos_comunes, error = validar_datos(request, user)
         if error:
             contexto = {'error': error, 'user': user}
-            return render(request, 'usuario/editar_perfil.html', contexto)
+            return render(request, 'usuario/editar_perfil/editar_perfil.html', contexto)
         user.email = datos_comunes['email']
         user.dni = datos_comunes['dni']
         user.nombre = datos_comunes['nombre']
@@ -140,7 +140,6 @@ def cambiar_imagen(request):
     user = request.user
     if request.method == 'POST':
         imagen = request.FILES.get('imagen')
-        print(imagen)
         if imagen:
             user.imagen = imagen
             user.save()
@@ -149,7 +148,7 @@ def cambiar_imagen(request):
             user.imagen = 'usuarios/default-avatar.jpg'
             user.save()
             return redirect('perfil', user.id, user.slug)
-    return render(request, 'usuario/editar_perfil.html', {'user': user})
+    return render(request, 'usuario/editar_perfil/editar_perfil.html', {'user': user})
 
 
 # Validar contraseñas
@@ -176,7 +175,7 @@ def cambiar_contrasena(request):
                 error = validar_password(new_password)
                 if error:
                     contexto['error'] = error
-                    return render(request, 'usuario/editar_perfil.html', contexto)
+                    return render(request, 'usuario/editar_perfil/editar_perfil.html', contexto)
                 user.set_password(new_password)
                 user.save()
                 logout(request)  # Desloguear al usuario tras cambiar contraseña
@@ -184,7 +183,7 @@ def cambiar_contrasena(request):
             contexto['error'] = 'Las contraseñas no coinciden.'
         else:
             contexto['error'] = 'Contraseña actual incorrecta.'
-    return render(request, 'usuario/editar_perfil.html', contexto)
+    return render(request, 'usuario/editar_perfil/editar_perfil.html', contexto)
 
 
 # Eliminar cuenta de usuario
