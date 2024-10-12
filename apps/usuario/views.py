@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout, get_user_model
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
+from django.utils.text import slugify
 from django.urls import reverse
 from rest_framework import viewsets
 from .serializer import UsuarioSerializer

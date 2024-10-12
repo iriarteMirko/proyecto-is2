@@ -23,13 +23,26 @@ class Cancha(models.Model):
         # Verificar si el usuario pertenece al grupo 'Responsable'
         if not self.responsable.groups.filter(name='Responsable').exists():
             cliente_group = Group.objects.get(name='Cliente')
-            responsable_group, created = Group.objects.get_or_create(name='Responsable')
+            responsable_group = Group.objects.get(name='Responsable')
             
             # Remover del grupo Cliente y agregar a Responsable
             self.responsable.groups.remove(cliente_group)
             self.responsable.groups.add(responsable_group)
         
-        if not self.slug:
+        if not self.pk or Cancha.objects.get(pk=self.pk).nombre != self.nombre:
             self.slug = slugify(self.nombre)
         
         super(Cancha, self).save(*args, **kwargs)
+    
+    def delete(self, *args, **kwargs):
+        super(Cancha, self).delete(*args, **kwargs)
+        
+        # Verificar si el usuario tiene otras canchas
+        if self.responsable.canchas.count() == 0:
+            cliente_group = Group.objects.get(name='Cliente')
+            responsable_group = Group.objects.get(name='Responsable')
+            
+            # Si el usuario no tiene más canchas, cambiarlo de grupo a "Cliente"
+            if responsable_group in self.responsable.groups.all():
+                self.responsable.groups.remove(responsable_group)
+                self.responsable.groups.add(cliente_group)

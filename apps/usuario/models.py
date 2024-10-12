@@ -82,9 +82,9 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         return f'{self.nombre} {self.apellidos}'
     
     def save(self, *args, **kwargs):
-        # Generar slug automáticamente si está vacío
-        if not self.slug:
+        if not self.pk or Usuario.objects.get(pk=self.pk).nombre != self.nombre:
             self.slug = slugify(f'{self.nombre} {self.apellidos}')
+        
         super(Usuario, self).save(*args, **kwargs)
     
     @property
