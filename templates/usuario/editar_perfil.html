@@ -47,23 +47,22 @@
             <h4 style="color: #2C3E50; font-weight: bold;" class="mb-3">Cambiar Imagen de Perfil</h4>
             <form method="POST" action="{% url 'cambiar_imagen' %}" enctype="multipart/form-data">
                 {% csrf_token %}
-                <div class="d-flex align-items-center mb-3">
-                    <a id="profileImageLink" class="rounded-circle" 
-                    style="width: 200px; height: 200px; background-size: cover; background-position: center; background-image: url({% if user.imagen %} {{ user.imagen.url }} {% else %} 'https://imgur.com/CuXg45K.jpg' {% endif %});"></a>
-                    <div class="ps-3">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center">
+                        <img id="profileImagePreview" src="{% if user.imagen %}{{ user.imagen.url }}{% else %}https://imgur.com/CuXg45K.jpg{% endif %}" 
+                            alt="Imagen de perfil" class="rounded-circle shadow-sm" 
+                            style="width: 150px; height: 150px; object-fit: cover;">
+                    </div>
+                    <div class="ms-3">
                         <label for="profileImageInput" class="btn btn-outline-primary">Subir nueva imagen</label>
                         <input type="file" id="profileImageInput" name="imagen" accept="image/*" style="display: none;" onchange="previewImage(event)">
-                        <button type="button" class="btn btn-outline-danger" onclick="setDefaultImage(event)">Quitar imagen</button>
+                        <button type="button" class="btn btn-outline-danger" onclick="resetImage()">Quitar Imagen</button>
                     </div>
                 </div>
-                <!-- Botones de Acción -->
-                <div class="text-end mt-5">
+                <div class="text-end mt-4">
                     <a href="{% url 'perfil' user.id user.slug %}" class="btn px-4 py-2 shadow-sm" style="background-color: #2C3E50; color: #fff; font-weight: bold;">Cancelar</a>
-                    <button type="submit" class="btn px-4 py-2 shadow-sm" style="background-color: #4CAF50; color: #fff; font-weight: bold;" onclick="handleFormSubmit()">Actualizar Imagen</button>
+                    <button type="submit" class="btn px-4 py-2 shadow-sm" style="background-color: #4CAF50; color: #fff; font-weight: bold;">Actualizar Imagen</button>
                 </div>
-                {% if error1 %}
-                <h5 class="text-center mt-3" style="color:red">{{ error1 }}</h5>
-                {% endif %}
             </form>
             <!-- Sección para cambiar la contraseña -->
             <hr class="my">
@@ -89,7 +88,7 @@
                     <a href="{% url 'perfil' user.id user.slug %}" class="btn px-4 py-2 shadow-sm" style="background-color: #2C3E50; color: #fff; font-weight: bold;">Cancelar</a>
                     <button type="submit" class="btn px-4 py-2 shadow-sm" style="background-color: #4CAF50; color: #fff; font-weight: bold;">Actualizar Contraseña</button>
                 </div>
-                {% if error2 %}
+                {% if error %}
                 <div class="toast-container position-fixed top-0 end-0 pt-5 mt-5">
                     <div id="liveToast2" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
                         <div class="toast-header">
@@ -100,7 +99,7 @@
                             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
                         </div>
                         <div class="toast-body" style="color:red">
-                            {{ error2 }}
+                            {{ error }}
                         </div>
                     </div>
                 </div>
@@ -129,71 +128,22 @@
 </main>
 
 <script>
-    // Funciones para los mensajes de error
-    document.addEventListener("DOMContentLoaded", function() {
-        var errorExists = "{{ error }}" !== "";
-        var error2Exists = "{{ error2 }}" !== "";
-        if (errorExists) {
-            var toastEl = document.getElementById("liveToast");
-            var toast = new bootstrap.Toast(toastEl, { delay: 5000 });
-            toast.show();
-        }
-        if (error2Exists) {
-            var toastEl2 = document.getElementById("liveToast2");
-            var toast2 = new bootstrap.Toast(toastEl2, { delay: 5000 });
-            toast2.show();
-        }
-    });
-
-    // Funciones para la imagen de perfil
     function previewImage(event) {
         const file = event.target.files[0];
-        if (!file) return;
-        // Validar el tipo de archivo
-        const validImageTypes = ["image/jpeg", "image/jpg", "image/png"];
-        if (!validImageTypes.includes(file.type)) {
-            alert("Solo se permiten archivos PNG o JPG.");
-            event.target.value = ""; // Limpiar el input
-            return;
-        }
-        // Validar el tamaño del archivo
-        const maxSize = 5 * 1024 * 1024; // 5MB
-        if (file.size > maxSize) {
-            alert("El archivo no debe ser mayor a 5MB.");
-            event.target.value = ""; // Limpiar el input
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = function(){
-            const output = document.getElementById("profileImageLink");
-            output.style.backgroundImage = `url(${reader.result})`;
-        }
-        reader.readAsDataURL(file);
-    }
-
-    // Función para restablecer a la imagen predeterminada
-    function setDefaultImage(event) {
-        event.preventDefault();
-        const defaultImageUrl = "https://imgur.com/CuXg45K.jpg";
-        const output = document.getElementById("profileImageLink");
-        output.style.backgroundImage = `url(${defaultImageUrl})`;
-        document.getElementById("profileImageInput").value = ""; // Limpia el input
-    }
-
-    function handleFormSubmit() {
-        const fileInput = document.getElementById("profileImageInput");
-        if (!fileInput.value) {
-            // Si no hay una imagen seleccionada, limpia el input para evitar cambiar la imagen
-            fileInput.name = "";
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function () {
+                document.getElementById('profileImagePreview').src = reader.result;
+            };
+            reader.readAsDataURL(file);
         }
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
-        const profileImageLink = document.getElementById("profileImageLink");
-        if (!profileImageLink.style.backgroundImage || profileImageLink.style.backgroundImage === "none") {
-            profileImageLink.style.backgroundImage = "url(https://imgur.com/CuXg45K.jpg)";
-        }
-    });
+    function resetImage() {
+        const defaultImage = "https://imgur.com/CuXg45K.jpg";
+        document.getElementById('profileImagePreview').src = defaultImage;
+        document.getElementById('profileImageInput').value = "";
+    }
 </script>
 
 {% endblock %}

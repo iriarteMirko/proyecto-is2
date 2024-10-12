@@ -131,7 +131,7 @@ def actualizar_perfil(request):
         user.apellidos = datos_comunes['apellidos']
         user.celular = datos_comunes['celular']
         user.save()
-    return redirect('perfil')
+    return redirect('perfil', user.id, user.slug)
 
 
 # Cambiar imagen de perfil
@@ -140,11 +140,16 @@ def cambiar_imagen(request):
     user = request.user
     if request.method == 'POST':
         imagen = request.FILES.get('imagen')
+        print(imagen)
         if imagen:
             user.imagen = imagen
             user.save()
-            return redirect('perfil')
-    return render(request, 'usuario/editar_perfil.html', {'user': user, 'error1': 'Datos no válidos. Intente nuevamente.'})
+            return redirect('perfil', user.id, user.slug)
+        else:
+            user.imagen = 'usuarios/default-avatar.jpg'
+            user.save()
+            return redirect('perfil', user.id, user.slug)
+    return render(request, 'usuario/editar_perfil.html', {'user': user})
 
 
 # Validar contraseñas
@@ -170,15 +175,15 @@ def cambiar_contrasena(request):
             if new_password == confirm_password:
                 error = validar_password(new_password)
                 if error:
-                    contexto['error2'] = error
+                    contexto['error'] = error
                     return render(request, 'usuario/editar_perfil.html', contexto)
                 user.set_password(new_password)
                 user.save()
                 logout(request)  # Desloguear al usuario tras cambiar contraseña
                 return redirect('signin')
-            contexto['error2'] = 'Las contraseñas no coinciden.'
+            contexto['error'] = 'Las contraseñas no coinciden.'
         else:
-            contexto['error2'] = 'Contraseña actual incorrecta.'
+            contexto['error'] = 'Contraseña actual incorrecta.'
     return render(request, 'usuario/editar_perfil.html', contexto)
 
 
