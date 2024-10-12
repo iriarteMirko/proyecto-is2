@@ -13,18 +13,18 @@
                         </a>
                     </li>
                     <li class="nav-item mx-3">
-                        <a class="nav-link display-1 text-uppercase text-white" href="{% url 'perfil' user.id user.slug %}">
+                        <a class="nav-link display-1 text-uppercase text-white" href="{% url 'perfil' request.user.id request.user.slug %}">
                             <b>Mi Perfil</b>
                         </a>
                     </li>
                     <li class="nav-item mx-3">
-                        <a class="nav-link display-1 text-uppercase text-white" href="{% url 'perfil' user.id user.slug %}">
+                        <a class="nav-link display-1 text-uppercase text-white" href="{% url 'perfil' request.user.id request.user.slug %}">
                             <b>Mis Reservas</b>
                         </a>
                     </li>
                     {% if request.user.is_responsible %}
                         <li class="nav-item mx-3">
-                            <a class="nav-link display-1 text-uppercase text-white" href="{% url 'perfil' user.id user.slug %}">
+                            <a class="nav-link display-1 text-uppercase text-white" href="{% url 'perfil' request.user.id request.user.slug %}">
                                 <b>Mis Canchas</b>
                             </a>
                         </li>
