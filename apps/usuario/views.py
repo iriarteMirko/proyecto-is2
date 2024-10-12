@@ -75,7 +75,7 @@ def perfil(request, usuario_id, usuario_slug):
     contexto = {'user': user}
     if user.is_responsible:
         contexto['responsable'] = user
-    return render(request, 'usuario/perfil.html', contexto)
+    return render(request, 'usuario/perfil/perfil.html', contexto)
 
 
 # Lleva a la vista de edición de perfil
