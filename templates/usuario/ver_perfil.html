@@ -14,10 +14,14 @@
                             <img src="{% if user.imagen %} {{ user.imagen.url }} {% else %} https://imgur.com/CuXg45K.jpg {% endif %}" 
                             class="rounded-circle img-fluid mb-3" alt="{{ user.nombre }} {{ user.apellidos }}" style="width: 150px; height: 150px;">
                             <h4>{{ user.nombre }} {{ user.apellidos }}</h4>
-                            {% if responsable %}
-                                <span class="badge bg-success">Responsable</span>
+                            {% if user.is_staff %}
+                                <span class="badge bg-danger">Administrador</span>
                             {% else %}
-                                <span class="badge bg-primary">Cliente</span>
+                                {% if responsable %}
+                                    <span class="badge bg-success">Responsable</span>
+                                {% else %}
+                                    <span class="badge bg-primary">Cliente</span>
+                                {% endif %}
                             {% endif %}
                         </div>
                     </div>
