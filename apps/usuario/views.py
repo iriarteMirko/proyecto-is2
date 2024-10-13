@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.urls import reverse
 from rest_framework import viewsets
 from .serializer import UsuarioSerializer
@@ -14,19 +15,23 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
     lookup_field = 'slug'
 
+def get_chanchas():
+    from apps.cancha.models import Cancha
+    canchas = Cancha.objects.prefetch_related('direcciones').all()
+    return canchas
 
 # Vista para la página de inicio
 def inicio(request):
-    from apps.cancha.models import Cancha
-    canchas = Cancha.objects.prefetch_related('direcciones').all()
     contexto = {
-        'canchas': canchas
+        'canchas': get_chanchas()
     }
     return render(request, 'usuario/inicio/inicio.html', contexto)
 
 
 # Registro de usuarios (formulario de signup)
 def signup(request):
+    if request.user.is_authenticated:
+        return redirect('inicio')
     if request.method == 'POST':
         form = RegistroUsuarioForm(request.POST)
         if form.is_valid():
@@ -49,6 +54,8 @@ def signup(request):
 
 # Inicio de sesión
 def signin(request):
+    if request.user.is_authenticated:
+        return redirect('inicio')
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
@@ -118,6 +125,7 @@ def validar_datos(request, user):
 
 # Actualizar perfil (con validación)
 @login_required
+@require_POST
 def actualizar_perfil(request):
     user = request.user
     if request.method == 'POST':
@@ -136,6 +144,7 @@ def actualizar_perfil(request):
 
 # Cambiar imagen de perfil
 @login_required
+@require_POST
 def cambiar_imagen(request):
     user = request.user
     if request.method == 'POST':
@@ -163,6 +172,7 @@ def validar_password(password):
 
 # Cambiar la contraseña
 @login_required
+@require_POST
 def cambiar_contrasena(request):
     user = request.user
     contexto = {'user': user}
@@ -178,7 +188,7 @@ def cambiar_contrasena(request):
                     return render(request, 'usuario/editar_perfil/editar_perfil.html', contexto)
                 user.set_password(new_password)
                 user.save()
-                logout(request)  # Desloguear al usuario tras cambiar contraseña
+                logout(request)
                 return redirect('signin')
             contexto['error'] = 'Las contraseñas no coinciden.'
         else:
@@ -186,12 +196,22 @@ def cambiar_contrasena(request):
     return render(request, 'usuario/editar_perfil/editar_perfil.html', contexto)
 
 
-# Eliminar cuenta de usuario
 @login_required
+@require_POST
 def eliminar_cuenta(request):
     user = request.user
-    user.delete()
-    return redirect('inicio')
+    password = request.POST.get('password')
+    if authenticate(username=user.email, password=password):
+        user.delete()
+        contexto = {
+            'canchas': get_chanchas(),
+            'msg': 'Tu cuenta ha sido eliminada correctamente.'
+        }
+        logout(request)
+        return render(request, 'usuario/inicio/inicio.html', contexto)
+    else:
+        contexto = {'error': 'Contraseña incorrecta. No se pudo eliminar la cuenta.'}
+        return render(request, 'usuario/editar_perfil/editar_perfil.html', contexto)
 
 
 # Manejo de errores 404 personalizados
