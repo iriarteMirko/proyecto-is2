@@ -5,9 +5,18 @@
 <main class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card shadow-lg">
+            <div class="card shadow-lg position-relative">
                 <div class="card-body p-5">
-                    <h2 class="text-center mb-4" style="color: #4CAF50; font-weight: bold;">{{ cancha.nombre }}</h2>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="text flex-grow-1" style="color: #4CAF50; font-weight: bold; margin: 0;">
+                            {{ cancha.nombre }}
+                        </h2>
+                        <a href="{% url 'inicio' %}" 
+                            class="btn btn-secondary shadow-sm" 
+                            style="background-color: #2C3E50; color: #fff; font-weight: bold;">
+                            <i class="bi bi-arrow-left me-1"></i> Inicio
+                        </a>
+                    </div>
                     <hr>
                     <!-- Información de la Cancha -->
                     <h4 style="color: #2C3E50; font-weight: bold;" class="mb-3">Información de la Cancha</h4>
@@ -37,7 +46,9 @@
                     </ul>
                     {% if responsable %}
                     <div class="text-center mt-5">
-                        <a href="{% url 'editar_cancha' cancha.id cancha.slug %}" class="btn btn-warning px-4 py-2 shadow-sm me-2" style="font-weight: bold;">
+                        <a href="{% url 'editar_cancha' cancha.id cancha.slug %}" 
+                            class="btn btn-warning px-4 py-2 shadow-sm me-2" 
+                            style="font-weight: bold;">
                             Editar Cancha
                         </a>
                         <form method="POST" action="{% url 'eliminar_cancha' cancha.id cancha.slug %}" class="d-inline">
@@ -48,11 +59,6 @@
                         </form>
                     </div>
                     {% endif %}
-                    <div class="text-center mt-4">
-                        <a href="{% url 'inicio' %}" class="btn btn-secondary px-4 py-2 shadow-sm" style="background-color: #2C3E50; color: #fff; font-weight: bold;">
-                            Volver a Inicio
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>
