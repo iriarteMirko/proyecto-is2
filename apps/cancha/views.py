@@ -53,12 +53,16 @@ def registro_cancha(request):
 @login_required
 def detalle_cancha(request, cancha_id, cancha_slug):
     cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug)
-    contexto = {'cancha': cancha}
+    contexto = {
+        'cancha': cancha,
+        'responsable': request.user == cancha.responsable
+    }
     return render(request, 'cancha/detalle_cancha.html', contexto)
 
 @login_required
 def editar_cancha(request, cancha_id, cancha_slug):
     cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug, responsable=request.user)
+    direccion = cancha.direcciones.first()
     if request.method == 'POST':
         nombre = request.POST.get('nombre')
         tipo_calle = request.POST.get('tipo_calle')
@@ -70,18 +74,20 @@ def editar_cancha(request, cancha_id, cancha_slug):
         if not all([nombre, tipo_calle, nombre_calle, numero_calle, distrito]):
             messages.error(request, 'Todos los campos obligatorios deben estar completos.')
             return render(request, 'cancha/editar_cancha.html', {'cancha': cancha})
+        if not direccion:
+            messages.error(request, 'Dirección no encontrada.')
+            return render(request, 'cancha/editar_cancha.html', {'cancha': cancha})
         
         cancha.nombre = nombre
-        cancha.direccion.tipo_calle = tipo_calle
-        cancha.direccion.nombre_calle = nombre_calle
-        cancha.direccion.numero_calle = numero_calle
-        cancha.direccion.distrito = distrito
-        cancha.direccion.referencia = referencia
+        direccion.tipo_calle = tipo_calle
+        direccion.nombre_calle = nombre_calle
+        direccion.numero_calle = numero_calle
+        direccion.distrito = distrito
+        direccion.referencia = referencia
+        direccion.save()
         cancha.save()
-        cancha.direccion.save()
-        
         messages.success(request, 'Datos actualizados correctamente.')
-        return redirect('detalle_cancha', cancha.slug)
+        return redirect('detalle_cancha', cancha.id, cancha.slug)
     return render(request, 'cancha/editar_cancha.html', {'cancha': cancha})
 
 @login_required
