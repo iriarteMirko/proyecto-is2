@@ -73,10 +73,10 @@ def editar_cancha(request, cancha_id, cancha_slug):
         
         if not all([nombre, tipo_calle, nombre_calle, numero_calle, distrito]):
             messages.error(request, 'Todos los campos obligatorios deben estar completos.')
-            return render(request, 'cancha/editar_cancha.html', {'cancha': cancha})
+            return render(request, 'cancha/editar_cancha/editar_cancha.html', {'cancha': cancha})
         if not direccion:
             messages.error(request, 'Dirección no encontrada.')
-            return render(request, 'cancha/editar_cancha.html', {'cancha': cancha})
+            return render(request, 'cancha/editar_cancha/editar_cancha.html', {'cancha': cancha})
         
         cancha.nombre = nombre
         direccion.tipo_calle = tipo_calle
@@ -88,7 +88,7 @@ def editar_cancha(request, cancha_id, cancha_slug):
         cancha.save()
         messages.success(request, 'Datos actualizados correctamente.')
         return redirect('detalle_cancha', cancha.id, cancha.slug)
-    return render(request, 'cancha/editar_cancha.html', {'cancha': cancha})
+    return render(request, 'cancha/editar_cancha/editar_cancha.html', {'cancha': cancha})
 
 @login_required
 @require_POST
