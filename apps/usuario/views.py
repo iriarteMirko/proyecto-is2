@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.contrib import messages
 from django.urls import reverse
 from rest_framework import viewsets
 from .serializer import UsuarioSerializer
@@ -15,17 +16,12 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
     lookup_field = 'slug'
 
-def get_chanchas():
-    from apps.cancha.models import Cancha
-    canchas = Cancha.objects.prefetch_related('direcciones').all()
-    return canchas
 
 # Vista para la página de inicio
 def inicio(request):
-    contexto = {
-        'canchas': get_chanchas()
-    }
-    return render(request, 'usuario/inicio/inicio.html', contexto)
+    from apps.cancha.models import Cancha
+    canchas = Cancha.objects.prefetch_related('direcciones').all()
+    return render(request, 'usuario/inicio/inicio.html', {'canchas': canchas})
 
 
 # Registro de usuarios (formulario de signup)
@@ -41,11 +37,14 @@ def signup(request):
             user = authenticate(email=email, password=password)
             if user is not None:
                 login(request, user)
+                messages.success(request, 'Bienvenido, ' + user.nombre + '.')
                 return redirect('inicio')
             else:
-                return render(request, 'usuario/signup.html', {'form': form, 'error': 'Error al autenticar. Intente nuevamente.'})
+                messages.error(request, 'Error al autenticar. Intente nuevamente.')
+                return render(request, 'usuario/signup.html', {'form': form})
         else:
-            return render(request, 'usuario/signup.html', {'form': form, 'error': 'Datos no válidos. Intente nuevamente.'})
+            messages.error(request, 'Datos no válidos. Intente nuevamente.')
+            return render(request, 'usuario/signup.html', {'form': form})
     else:
         form = RegistroUsuarioForm()
     
@@ -64,8 +63,10 @@ def signin(request):
             login(request, user)
             if user.is_staff:
                 return redirect(reverse('admin:index'))
+            messages.success(request, 'Bienvenido, ' + user.nombre + '.')
             return redirect('inicio')
-        return render(request, 'usuario/signin.html', {'form': AuthenticationForm, 'error': 'Correo o contraseña incorrectos.'})
+        messages.error(request, 'El correo o la contraseña son incorrectos.')
+        return render(request, 'usuario/signin.html', {'form': AuthenticationForm})
     return render(request, 'usuario/signin.html', {'form': AuthenticationForm})
 
 
@@ -131,14 +132,15 @@ def actualizar_perfil(request):
     if request.method == 'POST':
         datos_comunes, error = validar_datos(request, user)
         if error:
-            contexto = {'error': error, 'user': user}
-            return render(request, 'usuario/editar_perfil/editar_perfil.html', contexto)
+            messages.error(request, error)
+            return render(request, 'usuario/editar_perfil/editar_perfil.html', {'user': user})
         user.email = datos_comunes['email']
         user.dni = datos_comunes['dni']
         user.nombre = datos_comunes['nombre']
         user.apellidos = datos_comunes['apellidos']
         user.celular = datos_comunes['celular']
         user.save()
+        messages.success(request, 'Datos actualizados correctamente.')
     return redirect('perfil', user.id, user.slug)
 
 
@@ -152,6 +154,7 @@ def cambiar_imagen(request):
         if imagen:
             user.imagen = imagen
             user.save()
+            messages.success(request, 'Imagen actualizada correctamente.')
             return redirect('perfil', user.id, user.slug)
         else:
             user.imagen = 'usuarios/default-avatar.jpg'
@@ -175,7 +178,6 @@ def validar_password(password):
 @require_POST
 def cambiar_contrasena(request):
     user = request.user
-    contexto = {'user': user}
     if request.method == 'POST':
         password = request.POST.get('password')
         new_password = request.POST.get('new_password')
@@ -184,16 +186,17 @@ def cambiar_contrasena(request):
             if new_password == confirm_password:
                 error = validar_password(new_password)
                 if error:
-                    contexto['error'] = error
-                    return render(request, 'usuario/editar_perfil/editar_perfil.html', contexto)
+                    messages.error(request, error)
+                    return render(request, 'usuario/editar_perfil/editar_perfil.html', {'user': user})
                 user.set_password(new_password)
                 user.save()
                 logout(request)
+                messages.success(request, 'Contraseña actualizada correctamente.')
                 return redirect('signin')
-            contexto['error'] = 'Las contraseñas no coinciden.'
+            messages.error(request, 'Las contraseñas no coinciden.')
         else:
-            contexto['error'] = 'Contraseña actual incorrecta.'
-    return render(request, 'usuario/editar_perfil/editar_perfil.html', contexto)
+            messages.error(request, 'Contraseña actual incorrecta.')
+    return render(request, 'usuario/editar_perfil/editar_perfil.html', {'user': user})
 
 
 @login_required
@@ -203,15 +206,12 @@ def eliminar_cuenta(request):
     password = request.POST.get('password')
     if authenticate(username=user.email, password=password):
         user.delete()
-        contexto = {
-            'canchas': get_chanchas(),
-            'msg': 'Tu cuenta ha sido eliminada correctamente.'
-        }
         logout(request)
-        return render(request, 'usuario/inicio/inicio.html', contexto)
+        messages.success(request, 'Tu cuenta ha sido eliminada correctamente.')
+        return redirect('inicio')
     else:
-        contexto = {'error': 'Contraseña incorrecta. No se pudo eliminar la cuenta.'}
-        return render(request, 'usuario/editar_perfil/editar_perfil.html', contexto)
+        messages.error(request, 'Contraseña incorrecta. No se pudo eliminar la cuenta.')
+        return redirect('editar_perfil')
 
 
 # Manejo de errores 404 personalizados

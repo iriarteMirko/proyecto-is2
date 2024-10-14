@@ -1,0 +1,84 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+
+<main class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4" style="color: #4CAF50; font-weight: bold;">Editar Cancha</h2>
+                    <!-- Formulario para editar cancha -->
+                    <form method="POST" action="{% url 'editar_cancha' cancha.id cancha.slug %}">
+                        {% csrf_token %}
+                        <!-- Nombre de la cancha -->
+                        <div class="mb-4">
+                            <label for="nombre" class="form-label" style="font-weight: bold; color: #F1C40F;">Nombre de la Cancha:</label>
+                            <input type="text" id="nombre" name="nombre" value="{{ cancha.nombre }}" 
+                                    class="form-control form-control-lg shadow-sm" maxlength="100" required>
+                        </div>
+                        <!-- Información de la dirección -->
+                        <h4 class="text-center mt-4 mb-3" style="color: #2C3E50; font-weight: bold;">Dirección</h4>
+                        <!-- Tipo de calle -->
+                        <div class="mb-4">
+                            <label for="tipo_calle" class="form-label" style="font-weight: bold; color: #F1C40F;">Tipo de Calle:</label>
+                            <select id="tipo_calle" name="tipo_calle" class="form-select form-select-lg shadow-sm" required>
+                                <option value="avenida" {% if cancha.direccion.tipo_calle == 'avenida' %}selected{% endif %}>Avenida</option>
+                                <option value="calle" {% if cancha.direccion.tipo_calle == 'calle' %}selected{% endif %}>Calle</option>
+                                <option value="jiron" {% if cancha.direccion.tipo_calle == 'jiron' %}selected{% endif %}>Jirón</option>
+                                <option value="pasaje" {% if cancha.direccion.tipo_calle == 'pasaje' %}selected{% endif %}>Pasaje</option>
+                            </select>
+                        </div>
+                        <!-- Nombre de la calle -->
+                        <div class="mb-4">
+                            <label for="nombre_calle" class="form-label" style="font-weight: bold; color: #F1C40F;">Nombre de la Calle:</label>
+                            <input type="text" id="nombre_calle" name="nombre_calle" value="{{ cancha.direccion.nombre_calle }}" 
+                                    class="form-control form-control-lg shadow-sm" maxlength="50" required>
+                        </div>
+                        <!-- Número de la calle -->
+                        <div class="mb-4">
+                            <label for="numero_calle" class="form-label" style="font-weight: bold; color: #F1C40F;">Número de la Calle:</label>
+                            <input type="text" id="numero_calle" name="numero_calle" value="{{ cancha.direccion.numero_calle }}" 
+                                    class="form-control form-control-lg shadow-sm" maxlength="5" pattern="\d+" required>
+                        </div>
+                        <!-- Distrito -->
+                        <div class="mb-4">
+                            <label for="distrito" class="form-label" style="font-weight: bold; color: #F1C40F;">Distrito:</label>
+                            <select id="distrito" name="distrito" class="form-select form-select-lg shadow-sm" required>
+                                <option value="barranco" {% if cancha.direccion.distrito == 'barranco' %}selected{% endif %}>Barranco</option>
+                                <option value="callao" {% if cancha.direccion.distrito == 'callao' %}selected{% endif %}>Callao</option>
+                                <option value="miraflores" {% if cancha.direccion.distrito == 'miraflores' %}selected{% endif %}>Miraflores</option>
+                                <option value="san_isidro" {% if cancha.direccion.distrito == 'san_isidro' %}selected{% endif %}>San Isidro</option>
+                                <option value="santiago_de_surco" {% if cancha.direccion.distrito == 'santiago_de_surco' %}selected{% endif %}>Santiago de Surco</option>
+                            </select>
+                        </div>
+                        <!-- Referencia (opcional) -->
+                        <div class="mb-4">
+                            <label for="referencia" class="form-label" style="font-weight: bold; color: #F1C40F;">Referencia (Opcional):</label>
+                            <input type="text" id="referencia" name="referencia" value="{{ cancha.direccion.referencia }}" 
+                                    class="form-control form-control-lg shadow-sm" maxlength="50">
+                        </div>
+                        <!-- Botones de acción -->
+                        <div class="text-center mt-5">
+                            <a href="{% url 'detalle_cancha' cancha.id cancha.slug %}" class="btn btn-secondary px-4 py-2 shadow-sm me-2"
+                                style="background-color: #2C3E50; color: #fff; font-weight: bold;">Cancelar</a>
+                            <button type="submit" class="btn btn-success px-4 py-2 shadow-sm" style="font-weight: bold;">Guardar Cambios</button>
+                        </div>
+                        <!-- Mostrar error si existe -->
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-danger mt-4 text-center" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+{% include "base/message.html" %}
+
+{% endblock %}

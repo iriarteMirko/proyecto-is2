@@ -19,7 +19,4 @@
         <a href="{% url 'perfil' user.id user.slug %}" class="btn px-4 py-2 shadow-sm" style="background-color: #2C3E50; color: #fff; font-weight: bold;">Cancelar</a>
         <button type="submit" class="btn px-4 py-2 shadow-sm" style="background-color: #4CAF50; color: #fff; font-weight: bold;">Actualizar Contraseña</button>
     </div>
-    {% if error %}
-        {% include "usuario/editar_perfil/msg_error.html" %}
-    {% endif %}
 </form>
