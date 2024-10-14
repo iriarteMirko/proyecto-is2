@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.urls import reverse
+from django.db.models import Q
 from rest_framework import viewsets
 from .serializer import UsuarioSerializer
 from .models import Usuario
@@ -21,7 +22,44 @@ class UsuarioViewSet(viewsets.ModelViewSet):
 def inicio(request):
     from apps.cancha.models import Cancha
     canchas = Cancha.objects.prefetch_related('direcciones').all()
-    return render(request, 'usuario/inicio/inicio.html', {'canchas': canchas})
+    
+    query = request.GET.get('q', '')
+    distrito = request.GET.get('distrito', '')
+    if query:
+        canchas = canchas.filter(nombre__icontains=query)
+    if distrito:
+        canchas = canchas.filter(direcciones__distrito=distrito)
+        
+    contexto = {
+        'canchas': canchas,
+        'query': query,
+        'distrito': distrito,
+        'DISTRITOS': [
+            ('barranco', 'Barranco'),
+            ('callao', 'Callao'),
+            ('cercado_de_lima', 'Cercado de Lima'),
+            ('chorrillos', 'Chorrillos'),
+            ('jesus_maria', 'Jesús María'),
+            ('la_molina', 'La Molina'),
+            ('lince', 'Lince'),
+            ('los_olivos', 'Los Olivos'),
+            ('magdalena', 'Magdalena'),
+            ('miraflores', 'Miraflores'),
+            ('pueblo_libre', 'Pueblo Libre'),
+            ('rimac', 'Rímac'),
+            ('san_borja', 'San Borja'),
+            ('san_isidro', 'San Isidro'),
+            ('san_juan_de_lurigancho', 'San Juan de Lurigancho'),
+            ('san_juan_de_miraflores', 'San Juan de Miraflores'),
+            ('san_miguel', 'San Miguel'),
+            ('santiago_de_surco', 'Santiago de Surco'),
+            ('surquillo', 'Surquillo'),
+            ('ventanilla', 'Ventanilla'),
+            ('villa_maria_del_triunfo', 'Villa María del Triunfo'),
+        ],
+    }
+    
+    return render(request, 'usuario/inicio/inicio.html', contexto)
 
 
 # Registro de usuarios (formulario de signup)
