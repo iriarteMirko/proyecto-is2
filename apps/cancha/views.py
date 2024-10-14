@@ -57,7 +57,7 @@ def detalle_cancha(request, cancha_id, cancha_slug):
         'cancha': cancha,
         'responsable': request.user == cancha.responsable
     }
-    return render(request, 'cancha/detalle_cancha.html', contexto)
+    return render(request, 'cancha/detalle_cancha/detalle_cancha.html', contexto)
 
 @login_required
 def editar_cancha(request, cancha_id, cancha_slug):
@@ -93,9 +93,13 @@ def editar_cancha(request, cancha_id, cancha_slug):
 @login_required
 @require_POST
 def eliminar_cancha(request, cancha_id, cancha_slug):
+    cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug, responsable=request.user)
     if request.method == 'POST':
-        cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug, responsable=request.user)
+        contraseña = request.POST.get('password')
+        if not request.user.check_password(contraseña):
+            messages.error(request, 'Contraseña incorrecta.')
+            return redirect('detalle_cancha', cancha_id, cancha_slug)
         cancha.delete()
-        messages.error(request, 'La cancha fue eliminada correctamente.')
+        messages.success(request, 'La cancha fue eliminada correctamente.')
         return redirect('inicio')
     return redirect('detalle_cancha', cancha_id, cancha_slug)
