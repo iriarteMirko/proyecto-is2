@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from apps.usuario.factory import CanchaConcreteFactory
 from .serializer import CanchaSerializer
 from .models import Cancha
-
+import re
 class CanchaViewSet(viewsets.ModelViewSet):
     serializer_class = CanchaSerializer
     queryset = Cancha.objects.all()
@@ -59,33 +59,55 @@ def detalle_cancha(request, cancha_id, cancha_slug):
     }
     return render(request, 'cancha/detalle_cancha/detalle_cancha.html', contexto)
 
+def validar_datos_cancha(request):
+    nombre = request.POST.get('nombre', '').strip()
+    tipo_calle = request.POST.get('tipo_calle', '').strip()
+    nombre_calle = request.POST.get('nombre_calle', '').strip()
+    numero_calle = request.POST.get('numero_calle', '').strip()
+    distrito = request.POST.get('distrito', '').strip()
+    referencia = request.POST.get('referencia', '').strip()
+    
+    if not all([nombre, tipo_calle, nombre_calle, numero_calle, distrito]):
+        return None, 'Todos los campos obligatorios deben estar completos.'
+    if not re.match(r'^[A-Za-z0-9\s]+$', nombre):
+        return None, 'El nombre solo puede contener letras, números y espacios.'
+    if not numero_calle.isdigit():
+        return None, 'El número de la calle debe ser un valor numérico.'
+    if referencia and not re.match(r'^[A-Za-z0-9\s,.]+$', referencia):
+        return None, 'La referencia solo puede contener letras, números, comas y puntos.'
+    
+    return {
+        'nombre': nombre,
+        'tipo_calle': tipo_calle,
+        'nombre_calle': nombre_calle,
+        'numero_calle': numero_calle,
+        'distrito': distrito,
+        'referencia': referencia
+    }, None
+
 @login_required
 def editar_cancha(request, cancha_id, cancha_slug):
     cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug, responsable=request.user)
     direccion = cancha.direcciones.first()
     if request.method == 'POST':
-        nombre = request.POST.get('nombre')
-        tipo_calle = request.POST.get('tipo_calle')
-        nombre_calle = request.POST.get('nombre_calle')
-        numero_calle = request.POST.get('numero_calle')
-        distrito = request.POST.get('distrito')
-        referencia = request.POST.get('referencia')
-        
-        if not all([nombre, tipo_calle, nombre_calle, numero_calle, distrito]):
-            messages.error(request, 'Todos los campos obligatorios deben estar completos.')
+        datos, error = validar_datos_cancha(request)
+        if error:
+            messages.error(request, error)
             return render(request, 'cancha/editar_cancha/editar_cancha.html', {'cancha': cancha})
         if not direccion:
             messages.error(request, 'Dirección no encontrada.')
             return render(request, 'cancha/editar_cancha/editar_cancha.html', {'cancha': cancha})
         
-        cancha.nombre = nombre
-        direccion.tipo_calle = tipo_calle
-        direccion.nombre_calle = nombre_calle
-        direccion.numero_calle = numero_calle
-        direccion.distrito = distrito
-        direccion.referencia = referencia
+        cancha.nombre = datos['nombre']
+        direccion.tipo_calle = datos['tipo_calle']
+        direccion.nombre_calle = datos['nombre_calle']
+        direccion.numero_calle = datos['numero_calle']
+        direccion.distrito = datos['distrito']
+        direccion.referencia = datos['referencia']
+        
         direccion.save()
         cancha.save()
+        
         messages.success(request, 'Datos actualizados correctamente.')
         return redirect('detalle_cancha', cancha.id, cancha.slug)
     return render(request, 'cancha/editar_cancha/editar_cancha.html', {'cancha': cancha})
