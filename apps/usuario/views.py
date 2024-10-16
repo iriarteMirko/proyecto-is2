@@ -5,7 +5,6 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.urls import reverse
-from django.db.models import Q
 from rest_framework import viewsets
 from .serializer import UsuarioSerializer
 from .models import Usuario

@@ -98,8 +98,7 @@ def eliminar_cancha(request, cancha_id, cancha_slug):
         contraseña = request.POST.get('password')
         if not request.user.check_password(contraseña):
             messages.error(request, 'Contraseña incorrecta.')
-            return redirect('detalle_cancha', cancha_id, cancha_slug)
+            return redirect('editar_cancha', cancha_id, cancha_slug)
         cancha.delete()
         messages.success(request, 'La cancha fue eliminada correctamente.')
         return redirect('inicio')
-    return redirect('detalle_cancha', cancha_id, cancha_slug)
