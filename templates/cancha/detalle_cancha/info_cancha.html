@@ -1,4 +1,3 @@
-<hr>
 <div class="d-flex justify-content-between align-items-center">
     <h4 style="color: #2C3E50; font-weight: bold;">Información de la Cancha</h4>
     {% if responsable %}
@@ -27,9 +26,6 @@
         <br>
         <strong style="color: #F1C40F;">Referencia:</strong> {{ direccion.referencia }}
         {% endif %}
-    </li>
-    <li class="list-group-item">
-        <strong style="color: #F1C40F;">Disponible:</strong> {{ cancha.disponibilidad|yesno:"Sí,No" }}
     </li>
     {% endwith %}
 </ul>

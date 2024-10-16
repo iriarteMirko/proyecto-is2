@@ -35,8 +35,17 @@
                             {{ direccion.numero_calle }} - {{ direccion.get_distrito_display }}
                     </p>
                 {% endwith %}
-                <p class="text-warning mb-0">
-                    <strong>Disponible:</strong> {{ cancha.disponibilidad|yesno:"Sí,No" }}
+                <p class="card-text mb-0">
+                    <strong>Disponible:</strong>
+                    {% if cancha.disponibilidad %}
+                        <span class="text-success">
+                            Sí <i class="bi bi-check-circle-fill"></i>
+                        </span>
+                    {% else %}
+                        <span class="text-danger">
+                            No <i class="bi bi-x-circle-fill"></i>
+                        </span>
+                    {% endif %}
                 </p>
             </div>
         </div>
