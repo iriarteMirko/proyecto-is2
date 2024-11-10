@@ -12,12 +12,18 @@
         text-decoration: none;
         color: inherit;
     }
+    .card-img-top {
+        height: 250px;
+        object-fit: cover;
+        width: 100%;
+    }
 </style>
 
 <div class="col-md-4">
     <a href="{% url 'detalle_cancha' cancha.id cancha.slug %}" class="card-link">
         <div class="card shadow-lg">
-            <img src="{% static 'images/cancha-banner.jpg' %}" class="card-img-top" alt="Cancha {{ cancha.nombre }}">
+            <img src="{% if cancha.imagen %}{{ cancha.imagen.url }}{% else %}{% static 'images/default-cancha.jpg' %}{% endif %}" 
+                class="card-img-top" alt="Cancha {{ cancha.nombre }}">
             <div class="card-body">
                 <h5 class="card-title text-center mb-3" style="font-weight: 900; letter-spacing: 2px; color: #4CAF50;">{{ cancha.nombre }}</h5>
                 <p class="card-text">
