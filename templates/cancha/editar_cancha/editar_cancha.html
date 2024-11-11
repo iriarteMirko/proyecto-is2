@@ -16,6 +16,7 @@
                             <input type="text" id="nombre" name="nombre" value="{{ cancha.nombre }}" 
                                 class="form-control form-control-lg shadow-sm" maxlength="100" required>
                         </div>
+                        {% include "cancha/editar_cancha/editar_imagen.html" %}
                         <!-- Incluir el template para editar la dirección de la cancha -->
                         {% include "cancha/editar_cancha/editar_direccion.html" %}
                         <!-- Botones para guardar cambios y cancelar -->

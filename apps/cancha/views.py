@@ -8,6 +8,7 @@ from apps.usuario.factory import CanchaConcreteFactory
 from .serializer import CanchaSerializer
 from .models import Cancha
 import re
+
 class CanchaViewSet(viewsets.ModelViewSet):
     serializer_class = CanchaSerializer
     queryset = Cancha.objects.all()
@@ -16,39 +17,6 @@ class CanchaViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         serializer.save(responsable=self.request.user)
-
-@login_required
-def registro_cancha(request):
-    if request.method == 'POST':
-        nombre = request.POST.get('nombre')
-        tipo_calle = request.POST.get('tipo_calle')
-        nombre_calle = request.POST.get('nombre_calle')
-        numero_calle = request.POST.get('numero_calle')
-        distrito = request.POST.get('distrito')
-        referencia = request.POST.get('referencia')
-        
-        # Usar la fábrica para crear la cancha con su dirección
-        factory = CanchaConcreteFactory()
-        cancha = factory.create_cancha(
-            nombre=nombre,
-            usuario=request.user
-        )
-        if cancha:
-            direccion = factory.create_direccion(
-                cancha=cancha,
-                tipo_calle=tipo_calle,
-                nombre_calle=nombre_calle,
-                numero_calle=numero_calle,
-                distrito=distrito,
-                referencia=referencia,
-            )
-            if direccion:
-                messages.success(request, 'Cancha registrada correctamente.')
-                return redirect('detalle_cancha', cancha.id, cancha.slug)
-            else:
-                return render(request, 'cancha/registro_cancha.html', {'error': 'Error al registrar la dirección. Intente nuevamente.'})
-        return render(request, 'cancha/registro_cancha.html', {'error': 'Error al crear la cancha. Intente nuevamente.'})
-    return render(request, 'cancha/registro_cancha.html')
 
 @login_required
 def detalle_cancha(request, cancha_id, cancha_slug):
@@ -84,6 +52,36 @@ def validar_datos_cancha(request):
         'distrito': distrito,
         'referencia': referencia
     }, None
+
+@login_required
+def registro_cancha(request):
+    if request.method == 'POST':
+        datos, error = validar_datos_cancha(request)
+        if error:
+            return render(request, 'cancha/registro_cancha.html', {'error': error})
+        
+        # Usar la fábrica para crear la cancha con su dirección
+        factory = CanchaConcreteFactory()
+        cancha = factory.create_cancha(
+            nombre=datos['nombre'],
+            usuario=request.user
+        )
+        if cancha:
+            direccion = factory.create_direccion(
+                cancha=cancha,
+                tipo_calle=datos['tipo_calle'],
+                nombre_calle=datos['nombre_calle'],
+                numero_calle=datos['numero_calle'],
+                distrito=datos['distrito'],
+                referencia=datos['referencia'],
+            )
+            if direccion:
+                messages.success(request, 'Cancha registrada correctamente.')
+                return redirect('detalle_cancha', cancha.id, cancha.slug)
+            else:
+                return render(request, 'cancha/registro_cancha.html', {'error': 'Error al registrar la dirección. Intente nuevamente.'})
+        return render(request, 'cancha/registro_cancha.html', {'error': 'Error al crear la cancha. Intente nuevamente.'})
+    return render(request, 'cancha/registro_cancha.html')
 
 @login_required
 def editar_cancha(request, cancha_id, cancha_slug):
