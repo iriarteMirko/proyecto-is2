@@ -4,6 +4,7 @@
 <hr>
 <div class="text-center mb-4">
     <img id="profileImagePreview" src="{% if cancha.imagen %}{{ cancha.imagen.url }}{% else %}{% static 'images/default-cancha.jpg' %}{% endif %}"
+        data-default-url="{% static 'images/default-cancha.jpg' %}"
         class="card-img-top" 
         alt="Imagen de {{ cancha.nombre }}" 
         style="height: 250px; object-fit: cover;">

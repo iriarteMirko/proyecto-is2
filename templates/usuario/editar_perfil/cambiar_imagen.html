@@ -5,7 +5,9 @@
     <div class="d-flex align-items-center justify-content-between mb-3">
         <div class="d-flex align-items-center">
             <img id="profileImagePreview" src="{% if user.imagen %}{{ user.imagen.url }}{% else %}{% static 'images/default-avatar.jpg' %}{% endif %}" 
-                alt="Imagen de perfil" class="rounded-circle shadow-sm" 
+                data-default-url="{% static 'images/default-avatar.jpg' %}"
+                class="rounded-circle shadow-sm" 
+                alt="Imagen de {{ user.nombre }} {{ user.apellidos }}" 
                 style="width: 150px; height: 150px; object-fit: cover;">
         </div>
         <div class="ms-3">
