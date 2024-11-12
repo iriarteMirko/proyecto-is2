@@ -3,17 +3,16 @@
 <h4 class="text-center mt-4 mb-3" style="color: #2C3E50; font-weight: bold;">Cambiar Imagen de la Cancha</h4>
 <hr>
 <div class="text-center mb-4">
-    <!-- Vista previa de la imagen actual -->
-    <img src="{% if cancha.imagen %}{{ cancha.imagen.url }}{% else %}{% static 'images/default-cancha.jpg' %}{% endif %}"
+    <img id="profileImagePreview" src="{% if cancha.imagen %}{{ cancha.imagen.url }}{% else %}{% static 'images/default-cancha.jpg' %}{% endif %}"
+        class="card-img-top" 
         alt="Imagen de {{ cancha.nombre }}" 
-        class="img-thumbnail rounded-circle" 
-        style="width: 150px; height: 150px;">
+        style="height: 250px; object-fit: cover;">
 </div>
 <div class="text-center mb-4">
     <!-- Botón para subir una nueva imagen -->
-    <input type="file" id="imagen" name="imagen" class="form-control-file d-none" accept="image/*">
-    <label for="imagen" class="btn btn-outline-primary shadow-sm me-2">Subir nueva imagen</label>
+    <label for="profileImageInput" class="btn btn-outline-primary">Subir nueva imagen</label>
+    <input type="file" id="profileImageInput" name="imagen" accept="image/*" style="display: none;" onchange="previewImage(event)">
     <!-- Botón para quitar la imagen -->
-    <button type="button" class="btn btn-outline-danger shadow-sm" onclick="document.getElementById('imagen').value = '';">Quitar Imagen</button>
+    <button type="button" class="btn btn-outline-danger" onclick="resetImage()">Quitar Imagen</button>
 </div>
 <hr>

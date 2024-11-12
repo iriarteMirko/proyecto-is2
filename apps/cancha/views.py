@@ -34,8 +34,9 @@ def validar_datos_cancha(request):
     numero_calle = request.POST.get('numero_calle', '').strip()
     distrito = request.POST.get('distrito', '').strip()
     referencia = request.POST.get('referencia', '').strip()
+    imagen = request.FILES.get('imagen')
     
-    if not all([nombre, tipo_calle, nombre_calle, numero_calle, distrito]):
+    if not all([nombre, imagen, tipo_calle, nombre_calle, numero_calle, distrito]):
         return None, 'Todos los campos obligatorios deben estar completos.'
     if not re.match(r'^[A-Za-z0-9\s]+$', nombre):
         return None, 'El nombre solo puede contener letras, números y espacios.'
@@ -43,6 +44,9 @@ def validar_datos_cancha(request):
         return None, 'El número de la calle debe ser un valor numérico.'
     if referencia and not re.match(r'^[A-Za-z0-9\s,.]+$', referencia):
         return None, 'La referencia solo puede contener letras, números, comas y puntos.'
+    if not imagen:
+        imagen = 'canchas/default-cancha.jpg'
+        return None, 'Imagen no encontrada.'
     
     return {
         'nombre': nombre,
@@ -50,7 +54,8 @@ def validar_datos_cancha(request):
         'nombre_calle': nombre_calle,
         'numero_calle': numero_calle,
         'distrito': distrito,
-        'referencia': referencia
+        'referencia': referencia,
+        'imagen': imagen
     }, None
 
 @login_required
@@ -97,6 +102,7 @@ def editar_cancha(request, cancha_id, cancha_slug):
             return render(request, 'cancha/editar_cancha/editar_cancha.html', {'cancha': cancha})
         
         cancha.nombre = datos['nombre']
+        cancha.imagen = datos['imagen']
         direccion.tipo_calle = datos['tipo_calle']
         direccion.nombre_calle = datos['nombre_calle']
         direccion.numero_calle = datos['numero_calle']
@@ -109,6 +115,23 @@ def editar_cancha(request, cancha_id, cancha_slug):
         messages.success(request, 'Datos actualizados correctamente.')
         return redirect('detalle_cancha', cancha.id, cancha.slug)
     return render(request, 'cancha/editar_cancha/editar_cancha.html', {'cancha': cancha})
+
+@login_required
+@require_POST
+def cambiar_imagen(request):
+    user = request.user
+    if request.method == 'POST':
+        imagen = request.FILES.get('imagen')
+        if imagen:
+            user.imagen = imagen
+            user.save()
+            messages.success(request, 'Imagen actualizada correctamente.')
+            return redirect('perfil', user.id, user.slug)
+        else:
+            user.imagen = 'usuarios/default-avatar.jpg'
+            user.save()
+            return redirect('perfil', user.id, user.slug)
+    return render(request, 'usuario/editar_perfil/editar_perfil.html', {'user': user})
 
 @login_required
 @require_POST

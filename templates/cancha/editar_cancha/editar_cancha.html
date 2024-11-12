@@ -9,7 +9,7 @@
                 <div class="card-body p-5">
                     <h2 class="text-center mb-4" style="color: #4CAF50; font-weight: bold;">Editar Cancha</h2>
                     <hr>
-                    <form method="POST" action="{% url 'editar_cancha' cancha.id cancha.slug %}">
+                    <form method="POST" action="{% url 'editar_cancha' cancha.id cancha.slug %}" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="mb-4">
                             <label for="nombre" class="form-label" style="font-weight: bold; color: #F1C40F;">Nombre de la Cancha:</label>
