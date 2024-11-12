@@ -36,7 +36,7 @@ def validar_datos_cancha(request):
     referencia = request.POST.get('referencia', '').strip()
     imagen = request.FILES.get('imagen')
     
-    if not all([nombre, imagen, tipo_calle, nombre_calle, numero_calle, distrito]):
+    if not all([nombre, tipo_calle, nombre_calle, numero_calle, distrito]):
         return None, 'Todos los campos obligatorios deben estar completos.'
     if not re.match(r'^[A-Za-z0-9\s]+$', nombre):
         return None, 'El nombre solo puede contener letras, números y espacios.'
@@ -46,7 +46,6 @@ def validar_datos_cancha(request):
         return None, 'La referencia solo puede contener letras, números, comas y puntos.'
     if not imagen:
         imagen = 'canchas/default-cancha.jpg'
-        return None, 'Imagen no encontrada.'
     
     return {
         'nombre': nombre,
