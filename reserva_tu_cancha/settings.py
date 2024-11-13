@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'apps.usuario',
     'apps.cancha',
     'apps.direccion',
+    'apps.horario',
+    'apps.reserva',
     
 ]
 
