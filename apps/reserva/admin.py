@@ -1,21 +1,31 @@
 from django.contrib import admin
+from django.core.exceptions import ValidationError
+from django.forms import ModelForm
 from .models import Reserva
 
-class ReservaAdmin(admin.ModelAdmin):
-    list_display = ['usuario', 'horario', 'hora_reserva_inicio', 'hora_reserva_fin', 'fecha_reserva']
-    list_filter = ['fecha_reserva', 'horario__cancha']  # Filtros por fecha y cancha
-    search_fields = ['usuario__email', 'horario__cancha__nombre']  # Búsqueda por usuario y nombre de la cancha
+class ReservaForm(ModelForm):
+    class Meta:
+        model = Reserva
+        fields = ['usuario', 'horario', 'hora_reserva_inicio', 'hora_reserva_fin']
     
-    def save_model(self, request, obj, form, change):
-        # Validación personalizada en el admin para evitar conflictos de reserva
-        if Reserva.objects.filter(
-            horario__cancha=obj.horario.cancha,
-            horario__dia=obj.horario.dia,
-            hora_reserva_inicio__lt=obj.hora_reserva_fin,
-            hora_reserva_fin__gt=obj.hora_reserva_inicio
-        ).exclude(id=obj.id).exists():
-            self.message_user(request, "Este horario ya está reservado. Elige otro.", level='error')
-        else:
-            super().save_model(request, obj, form, change)
+    def clean(self):
+        cleaned_data = super().clean()
+        reserva = Reserva(
+            usuario=cleaned_data.get('usuario'),
+            horario=cleaned_data.get('horario'),
+            hora_reserva_inicio=cleaned_data.get('hora_reserva_inicio'),
+            hora_reserva_fin=cleaned_data.get('hora_reserva_fin'),
+        )
+        try:
+            reserva.clean()
+        except ValidationError as e:
+            self.add_error(None, e)
+        return cleaned_data
+
+class ReservaAdmin(admin.ModelAdmin):
+    form = ReservaForm
+    list_display = ['usuario', 'horario', 'hora_reserva_inicio', 'hora_reserva_fin', 'fecha_reserva']
+    list_filter = ['horario__cancha', 'horario__dia', 'usuario']
+    search_fields = ['usuario__email', 'horario__cancha__nombre']
 
 admin.site.register(Reserva, ReservaAdmin)

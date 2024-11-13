@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from apps.horario.models import Horario
 
 class Reserva(models.Model):
@@ -16,12 +17,16 @@ class Reserva(models.Model):
     def __str__(self):
         return f'{self.usuario} reserva {self.horario.cancha.nombre} el {self.horario.dia} de {self.hora_reserva_inicio} a {self.hora_reserva_fin}'
     
-    def save(self, *args, **kwargs):
-        # Verificar que la reserva esté dentro del horario disponible
+    def clean(self):
+        # Validación: La reserva debe estar dentro del horario disponible
         if not (self.hora_reserva_inicio >= self.horario.hora_inicio and self.hora_reserva_fin <= self.horario.hora_fin):
-            raise ValueError("La reserva debe estar dentro del horario disponible.")
+            raise ValidationError("La reserva debe estar dentro del horario disponible.")
         
-        # Evitar reservas cruzadas en el mismo horario
+        # Validación: La hora reserva de inicio debe ser antes de la hora reserva de fin
+        if self.hora_reserva_inicio >= self.hora_reserva_fin:
+            raise ValidationError("La hora reserva de inicio debe ser anterior a la hora reserva de fin.")
+        
+        # Validación: Evitar reservas cruzadas en el mismo horario
         reservas_conflictivas = Reserva.objects.filter(
             horario__cancha=self.horario.cancha,
             horario__dia=self.horario.dia,
@@ -30,6 +35,8 @@ class Reserva(models.Model):
         ).exclude(id=self.id)
         
         if reservas_conflictivas.exists():
-            raise ValueError("El horario seleccionado ya está reservado. Elige otro horario.")
-        
+            raise ValidationError("El horario seleccionado ya está reservado. Elige otro horario.")
+    
+    def save(self, *args, **kwargs):
+        self.clean()
         super().save(*args, **kwargs)

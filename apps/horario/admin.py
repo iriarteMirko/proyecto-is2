@@ -1,17 +1,31 @@
 from django.contrib import admin
-from django.utils import timezone
+from django.core.exceptions import ValidationError
+from django.forms import ModelForm
 from .models import Horario
 
-class HorarioAdmin(admin.ModelAdmin):
-    list_display = ['cancha', 'dia', 'hora_inicio', 'hora_fin']
-    list_filter = ['dia', 'cancha']  # Filtros para facilitar la administración
-    search_fields = ['cancha__nombre']  # Búsqueda por nombre de la cancha
+class HorarioForm(ModelForm):
+    class Meta:
+        model = Horario
+        fields = ['cancha', 'dia', 'hora_inicio', 'hora_fin']
     
-    def save_model(self, request, obj, form, change):
-        # Validación personalizada en el admin al guardar un horario
-        if obj.dia < timezone.now().date() or (obj.dia == timezone.now().date() and obj.hora_inicio <= timezone.now().time()):
-            self.message_user(request, "El horario debe ser en una fecha y hora futuras.", level='error')
-        else:
-            super().save_model(request, obj, form, change)
+    def clean(self):
+        cleaned_data = super().clean()
+        horario = Horario(
+            cancha=cleaned_data.get('cancha'),
+            dia=cleaned_data.get('dia'),
+            hora_inicio=cleaned_data.get('hora_inicio'),
+            hora_fin=cleaned_data.get('hora_fin'),
+        )
+        try:
+            horario.clean()
+        except ValidationError as e:
+            self.add_error(None, e)  # Añade el error al formulario
+        return cleaned_data
+
+class HorarioAdmin(admin.ModelAdmin):
+    form = HorarioForm
+    list_display = ['cancha', 'dia', 'hora_inicio', 'hora_fin']
+    list_filter = ['cancha', 'dia']
+    search_fields = ['cancha__nombre', 'dia']
 
 admin.site.register(Horario, HorarioAdmin)

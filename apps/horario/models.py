@@ -1,12 +1,13 @@
 from django.db import models
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 from apps.cancha.models import Cancha
 
 class Horario(models.Model):
     cancha = models.ForeignKey(Cancha, on_delete=models.CASCADE, related_name='horarios')
-    dia = models.DateField()  # Día específico para el rango horario
-    hora_inicio = models.TimeField()  # Hora de inicio del rango de disponibilidad
-    hora_fin = models.TimeField()  # Hora de fin del rango de disponibilidad
+    dia = models.DateField()
+    hora_inicio = models.TimeField()
+    hora_fin = models.TimeField()
     
     class Meta:
         verbose_name = 'Horario'
@@ -16,15 +17,17 @@ class Horario(models.Model):
     def __str__(self):
         return f'{self.cancha.nombre} - {self.dia} de {self.hora_inicio} a {self.hora_fin}'
     
-    def save(self, *args, **kwargs):
+    def clean(self):
         ahora = timezone.now()
         
-        # Validación: solo permitir horarios en fechas futuras o la fecha actual si es en horas posteriores.
+        # Validación: Solo permitir horarios en fechas futuras o la fecha actual en horas posteriores
         if self.dia < ahora.date() or (self.dia == ahora.date() and self.hora_inicio <= ahora.time()):
-            raise ValueError("El horario debe ser en una fecha y hora futuras.")
+            raise ValidationError("El horario debe ser en una fecha y hora futuras.")
         
-        # Validación: la hora de inicio debe ser antes de la hora de fin.
+        # Validación: La hora de inicio debe ser antes de la hora de fin
         if self.hora_inicio >= self.hora_fin:
-            raise ValueError("La hora de inicio debe ser anterior a la hora de fin.")
-        
+            raise ValidationError("La hora de inicio debe ser anterior a la hora de fin.")
+    
+    def save(self, *args, **kwargs):
+        self.clean()
         super().save(*args, **kwargs)
