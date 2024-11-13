@@ -1,16 +1,30 @@
 from rest_framework import serializers
 from .models import Reserva
-from apps.horario.serializer import HorarioSerializer
-from apps.usuario.serializer import UsuarioSerializer
+from apps.horario.models import Horario
 
 class ReservaSerializer(serializers.ModelSerializer):
-    usuario = UsuarioSerializer(read_only=True)
-    horario = HorarioSerializer(read_only=True)
-    cancha_nombre = serializers.CharField(source='horario.cancha.nombre', read_only=True)
-    fecha = serializers.DateField(source='horario.fecha', read_only=True)
-    hora_inicio = serializers.TimeField(source='horario.hora_inicio', read_only=True)
-    hora_fin = serializers.TimeField(source='horario.hora_fin', read_only=True)
+    usuario = serializers.HiddenField(default=serializers.CurrentUserDefault())
     
     class Meta:
         model = Reserva
-        fields = ['id', 'usuario', 'horario', 'fecha_reserva', 'cancha_nombre', 'fecha', 'hora_inicio', 'hora_fin']
+        fields = ['id', 'usuario', 'horario', 'hora_reserva_inicio', 'hora_reserva_fin', 'fecha_reserva']
+    
+    def validate(self, data):
+        horario = data['horario']
+        
+        # Validar que la reserva esté dentro del horario de disponibilidad
+        if not (data['hora_reserva_inicio'] >= horario.hora_inicio and data['hora_reserva_fin'] <= horario.hora_fin):
+            raise serializers.ValidationError("La reserva debe estar dentro del horario disponible.")
+        
+        # Verificar conflicto con otras reservas
+        reservas_conflictivas = Reserva.objects.filter(
+            horario__cancha=horario.cancha,
+            horario__dia=horario.dia,
+            hora_reserva_inicio__lt=data['hora_reserva_fin'],
+            hora_reserva_fin__gt=data['hora_reserva_inicio']
+        ).exclude(usuario=data['usuario'])
+        
+        if reservas_conflictivas.exists():
+            raise serializers.ValidationError("El horario seleccionado ya está reservado. Elige otro horario.")
+        
+        return data
