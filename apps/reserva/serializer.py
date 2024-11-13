@@ -9,7 +9,6 @@ class ReservaSerializer(serializers.ModelSerializer):
         read_only_fields = ['fecha_reserva']
     
     def validate(self, data):
-        # Crear una instancia temporal para ejecutar la validación
         reserva = Reserva(**data)
         try:
             reserva.clean()

@@ -1,6 +1,12 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework import routers
 from . import views
 
+router = routers.DefaultRouter()
+router.register(r'horarios', views.HorarioViewSet)
+
 urlpatterns = [
+    # Rutas relacionadas con la API REST
+    path('api/', include(router.urls)),
     path('configurar/<int:cancha_id>/', views.configurar_horarios, name='configurar_horarios'),
 ]

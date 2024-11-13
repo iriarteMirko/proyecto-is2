@@ -12,7 +12,7 @@ class Horario(models.Model):
     class Meta:
         verbose_name = 'Horario'
         verbose_name_plural = 'Horarios'
-        unique_together = ['cancha', 'dia']  # Solo un rango horario por día por cancha
+        unique_together = ['cancha', 'dia']
     
     def __str__(self):
         return f'{self.cancha.nombre} - {self.dia} de {self.hora_inicio} a {self.hora_fin}'

@@ -8,7 +8,6 @@ class HorarioSerializer(serializers.ModelSerializer):
         fields = ['id', 'cancha', 'dia', 'hora_inicio', 'hora_fin']
     
     def validate(self, data):
-        # Crear instancia temporal para ejecutar la validación del modelo
         horario = Horario(**data)
         try:
             horario.clean()
