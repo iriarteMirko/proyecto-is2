@@ -23,9 +23,7 @@ class CanchaViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(responsable=self.request.user)
 
-@login_required
-def detalle_cancha(request, cancha_id, cancha_slug):
-    cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug)
+def obtener_dias_horarios(cancha):
     today = date.today()
     start_date = today.replace(day=1)
     end_date = (start_date + timedelta(days=31)).replace(day=1) - timedelta(days=1)
@@ -61,12 +59,19 @@ def detalle_cancha(request, cancha_id, cancha_slug):
             "estado": "lleno" if all(not h["disponible"] for h in horarios_disponibles) else "disponible"
         })
     
+    return dias_horarios
+
+@login_required
+def detalle_cancha(request, cancha_id, cancha_slug):
+    cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug)
+    responsable = request.user == cancha.responsable
+    dias_horarios = obtener_dias_horarios(cancha)
+    
     contexto = {
         'cancha': cancha,
-        'responsable': request.user == cancha.responsable,
+        'responsable': responsable,
         'dias_horarios': dias_horarios  # Añadir dias_horarios al contexto
     }
-    print(contexto)
     return render(request, 'cancha/detalle_cancha/detalle_cancha.html', contexto)
 
 def validar_datos_cancha(request):

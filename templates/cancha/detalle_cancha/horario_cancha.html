@@ -14,10 +14,13 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Cargar `dias_horarios` del contexto de Django y procesarlo en JavaScript
         const diasHorarios = {{ dias_horarios|safe }};
         const calendario = document.getElementById('calendario-horarios');
         calendario.innerHTML = generarHTMLCalendario(diasHorarios);
     });
+
+    // Función para generar el HTML del calendario
     function generarHTMLCalendario(diasHorarios) {
         let html = '<div class="calendar">';
         diasHorarios.forEach(dia => {
@@ -29,6 +32,8 @@
         html += '</div>';
         return html;
     }
+
+    // Función para mostrar los horarios de un día seleccionado
     function mostrarHorariosDelDia(dia, horarios) {
         const calendario = document.getElementById('calendario-horarios');
         let html = `<h5>Horarios para el ${dia}</h5><ul>`;
@@ -54,8 +59,9 @@
         text-align: center;
         border-radius: 5px;
         color: white;
+        border: 1px solid black;
     }
     .day:hover {
         opacity: 0.8;
-    }
+    }    
 </style>
