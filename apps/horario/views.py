@@ -33,7 +33,7 @@ class HorarioViewSet(viewsets.ModelViewSet):
             cancha_id=cancha_id
         )
         try:
-            horario.clean()  # Ejecutar validaciones definidas en el modelo
+            horario.clean()
         except ValidationError as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         

@@ -27,7 +27,7 @@ class ReservaViewSet(viewsets.ModelViewSet):
             hora_reserva_fin=hora_reserva_fin
         )
         try:
-            reserva.clean()  # Ejecutar validaciones definidas en el modelo
+            reserva.clean()
         except ValidationError as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         

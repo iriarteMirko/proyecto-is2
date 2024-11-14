@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from apps.cancha.models import Cancha
+from datetime import datetime
 
 class Horario(models.Model):
     cancha = models.ForeignKey(Cancha, on_delete=models.CASCADE, related_name='horarios')
@@ -19,6 +20,14 @@ class Horario(models.Model):
     
     def clean(self):
         ahora = timezone.now()
+        
+        if isinstance(self.dia, str):
+            self.dia = datetime.strptime(self.dia, "%Y-%m-%d").date()
+        
+        if isinstance(self.hora_inicio, str):
+            self.hora_inicio = datetime.strptime(self.hora_inicio, "%H:%M").time()
+        if isinstance(self.hora_fin, str):
+            self.hora_fin = datetime.strptime(self.hora_fin, "%H:%M").time()
         
         # Validación: Solo permitir horarios en fechas futuras o la fecha actual en horas posteriores
         if self.dia < ahora.date() or (self.dia == ahora.date() and self.hora_inicio <= ahora.time()):
