@@ -11,7 +11,7 @@ from apps.usuario.factory import CanchaConcreteFactory
 from apps.horario.models import Horario
 from apps.reserva.models import Reserva
 from .models import Cancha
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 import re
 
 class CanchaViewSet(viewsets.ModelViewSet):
@@ -26,10 +26,47 @@ class CanchaViewSet(viewsets.ModelViewSet):
 @login_required
 def detalle_cancha(request, cancha_id, cancha_slug):
     cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug)
+    today = date.today()
+    start_date = today.replace(day=1)
+    end_date = (start_date + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+    
+    horarios = Horario.objects.filter(cancha=cancha, dia__range=(start_date, end_date))
+    dias_horarios = []
+    
+    for horario in horarios:
+        reservas = Reserva.objects.filter(horario=horario)
+        horarios_disponibles = []
+        
+        for i in range(horario.hora_inicio.hour, horario.hora_fin.hour):
+            hora_inicio = horario.hora_inicio.replace(hour=i, minute=0, second=0)
+            hora_inicio_datetime = datetime.combine(horario.dia, hora_inicio)
+            hora_fin = (hora_inicio_datetime + timedelta(hours=1)).time()
+            
+            if not reservas.filter(hora_reserva_inicio=hora_inicio, hora_reserva_fin=hora_fin).exists():
+                horarios_disponibles.append({
+                    "hora_inicio": hora_inicio.strftime("%H:%M"),
+                    "hora_fin": hora_fin.strftime("%H:%M"),
+                    "disponible": True
+                })
+            else:
+                horarios_disponibles.append({
+                    "hora_inicio": hora_inicio.strftime("%H:%M"),
+                    "hora_fin": hora_fin.strftime("%H:%M"),
+                    "disponible": False
+                })
+        
+        dias_horarios.append({
+            "dia": horario.dia.strftime("%Y-%m-%d"),
+            "horarios": horarios_disponibles,
+            "estado": "lleno" if all(not h["disponible"] for h in horarios_disponibles) else "disponible"
+        })
+    
     contexto = {
         'cancha': cancha,
-        'responsable': request.user == cancha.responsable
+        'responsable': request.user == cancha.responsable,
+        'dias_horarios': dias_horarios  # Añadir dias_horarios al contexto
     }
+    print(contexto)
     return render(request, 'cancha/detalle_cancha/detalle_cancha.html', contexto)
 
 def validar_datos_cancha(request):
@@ -149,3 +186,42 @@ def eliminar_cancha(request, cancha_id, cancha_slug):
         cancha.delete()
         messages.success(request, 'La cancha fue eliminada correctamente.')
         return redirect('inicio')
+
+@login_required
+def obtener_horarios_mes(request, cancha_id):
+    cancha = get_object_or_404(Cancha, id=cancha_id)
+    today = date.today()
+    start_date = today.replace(day=1)  # Primer día del mes actual
+    end_date = (start_date + timedelta(days=31)).replace(day=1) - timedelta(days=1)  # Último día del mes actual
+    
+    horarios = Horario.objects.filter(cancha=cancha, dia__range=(start_date, end_date))
+    
+    dias_horarios = []
+    for horario in horarios:
+        reservas = Reserva.objects.filter(horario=horario)
+        horarios_disponibles = []
+        
+        # Revisa las horas del horario y su disponibilidad
+        for i in range(horario.hora_inicio.hour, horario.hora_fin.hour):
+            hora_inicio = horario.hora_inicio.replace(hour=i)
+            hora_fin = (hora_inicio + timedelta(hours=1)).time()
+            if not reservas.filter(hora_reserva_inicio=hora_inicio, hora_reserva_fin=hora_fin).exists():
+                horarios_disponibles.append({
+                    "hora_inicio": hora_inicio.strftime("%H:%M"),
+                    "hora_fin": hora_fin.strftime("%H:%M"),
+                    "disponible": True
+                })
+            else:
+                horarios_disponibles.append({
+                    "hora_inicio": hora_inicio.strftime("%H:%M"),
+                    "hora_fin": hora_fin.strftime("%H:%M"),
+                    "disponible": False
+                })
+        
+        dias_horarios.append({
+            "dia": horario.dia.strftime("%Y-%m-%d"),
+            "horarios": horarios_disponibles,
+            "estado": "lleno" if all(not h["disponible"] for h in horarios_disponibles) else "disponible"
+        })
+    
+    return JsonResponse(dias_horarios, safe=False)

@@ -43,15 +43,15 @@
                         {% endif %}
                     </div>
                     <hr>
-                    
                     <!-- Información de la Cancha -->
                     {% include "cancha/detalle_cancha/info_cancha.html" %}
+                    <hr>
+                    <!-- Calendario de Horarios Disponibles -->
+                    {% include "cancha/detalle_cancha/horario_cancha.html" %}
                 </div>
             </div>
         </div>
     </div>
 </main>
-
-{% include "base/message.html" %}
 
 {% endblock %}

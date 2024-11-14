@@ -13,4 +13,6 @@ urlpatterns = [
     path('detalle/<int:cancha_id>/<slug:cancha_slug>/', views.detalle_cancha, name='detalle_cancha'),
     path('editar/<int:cancha_id>/<slug:cancha_slug>/', views.editar_cancha, name='editar_cancha'),
     path('eliminar/<int:cancha_id>/<slug:cancha_slug>/', views.eliminar_cancha, name='eliminar_cancha'),
+    path('detalle/<int:cancha_id>/horarios/', views.obtener_horarios_mes, name='obtener_horarios_mes'),
+    
 ]

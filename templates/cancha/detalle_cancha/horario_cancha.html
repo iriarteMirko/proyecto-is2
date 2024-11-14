@@ -1,0 +1,61 @@
+<div class="d-flex justify-content-between align-items-center mt-4">
+    <h4 style="color: #2C3E50; font-weight: bold;">Horarios Disponibles</h4>
+    {% if responsable %}
+    <a href="" 
+        class="btn btn-warning shadow-sm ms-2" 
+        style="font-weight: bold;">
+        Editar Horarios
+    </a>
+    {% endif %}
+</div>
+<div id="calendario-horarios" class="mb-4">
+    <!-- Aquí se cargará el calendario -->
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const diasHorarios = {{ dias_horarios|safe }};
+        const calendario = document.getElementById('calendario-horarios');
+        calendario.innerHTML = generarHTMLCalendario(diasHorarios);
+    });
+    function generarHTMLCalendario(diasHorarios) {
+        let html = '<div class="calendar">';
+        diasHorarios.forEach(dia => {
+            const estadoColor = dia.estado === 'disponible' ? 'green' : 'red';
+            html += `<div class="day" style="background-color: ${estadoColor}; cursor: pointer;" onclick="mostrarHorariosDelDia('${dia.dia}', ${JSON.stringify(dia.horarios)})">
+                    <span>${dia.dia}</span>
+                    </div>`;
+        });
+        html += '</div>';
+        return html;
+    }
+    function mostrarHorariosDelDia(dia, horarios) {
+        const calendario = document.getElementById('calendario-horarios');
+        let html = `<h5>Horarios para el ${dia}</h5><ul>`;
+        
+        horarios.forEach(horario => {
+            const color = horario.disponible ? 'green' : 'red';
+            html += `<li style="color: ${color};">${horario.hora_inicio} - ${horario.hora_fin}</li>`;
+        });
+        
+        html += '</ul>';
+        calendario.innerHTML = html;
+    }
+</script>
+
+<style>
+    .calendar {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 5px;
+    }
+    .day {
+        padding: 10px;
+        text-align: center;
+        border-radius: 5px;
+        color: white;
+    }
+    .day:hover {
+        opacity: 0.8;
+    }
+</style>
