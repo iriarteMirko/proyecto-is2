@@ -2,11 +2,16 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib import messages
+from django.utils import timezone
+from django.http import JsonResponse
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from apps.usuario.factory import CanchaConcreteFactory
 from .serializer import CanchaSerializer
+from apps.usuario.factory import CanchaConcreteFactory
+from apps.horario.models import Horario
+from apps.reserva.models import Reserva
 from .models import Cancha
+from datetime import date, timedelta
 import re
 
 class CanchaViewSet(viewsets.ModelViewSet):

@@ -8,5 +8,5 @@ router.register(r'horarios', views.HorarioViewSet)
 urlpatterns = [
     # Rutas relacionadas con la API REST
     path('api/', include(router.urls)),
-    path('configurar/<int:cancha_id>/', views.configurar_horarios, name='configurar_horarios'),
+    
 ]

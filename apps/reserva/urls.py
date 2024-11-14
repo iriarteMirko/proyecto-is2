@@ -8,5 +8,5 @@ router.register(r'reservas', views.ReservaViewSet)
 urlpatterns = [
     # Rutas relacionadas con la API REST
     path('api/', include(router.urls)),
-    path('reservar/<int:horario_id>/', views.realizar_reserva, name='realizar_reserva'),
+    
 ]
