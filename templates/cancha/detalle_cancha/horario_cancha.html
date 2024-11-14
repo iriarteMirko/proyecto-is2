@@ -8,60 +8,23 @@
     </a>
     {% endif %}
 </div>
-<div id="calendario-horarios" class="mb-4">
-    <!-- Aquí se cargará el calendario -->
+<div class="mb-4 mt-4">
+    {% if dias_horarios %}
+        <ul class="list-group">
+            {% for fecha_dia in dias_horarios %}
+                <li class="list-group-item">
+                    <strong>{{ fecha_dia.dia }}</strong>
+                    <ul>
+                        {% for horario in fecha_dia.horarios %}
+                            <li>
+                                <span style="color: green;">{{ horario.hora_inicio }} - {{ horario.hora_fin }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay fechas disponibles en este momento.</p>
+    {% endif %}
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Cargar `dias_horarios` del contexto de Django y procesarlo en JavaScript
-        const diasHorarios = {{ dias_horarios|safe }};
-        const calendario = document.getElementById('calendario-horarios');
-        calendario.innerHTML = generarHTMLCalendario(diasHorarios);
-    });
-
-    // Función para generar el HTML del calendario
-    function generarHTMLCalendario(diasHorarios) {
-        let html = '<div class="calendar">';
-        diasHorarios.forEach(dia => {
-            const estadoColor = dia.estado === 'disponible' ? 'green' : 'red';
-            html += `<div class="day" style="background-color: ${estadoColor}; cursor: pointer;" onclick="mostrarHorariosDelDia('${dia.dia}', ${JSON.stringify(dia.horarios)})">
-                    <span>${dia.dia}</span>
-                    </div>`;
-        });
-        html += '</div>';
-        return html;
-    }
-
-    // Función para mostrar los horarios de un día seleccionado
-    function mostrarHorariosDelDia(dia, horarios) {
-        const calendario = document.getElementById('calendario-horarios');
-        let html = `<h5>Horarios para el ${dia}</h5><ul>`;
-        
-        horarios.forEach(horario => {
-            const color = horario.disponible ? 'green' : 'red';
-            html += `<li style="color: ${color};">${horario.hora_inicio} - ${horario.hora_fin}</li>`;
-        });
-        
-        html += '</ul>';
-        calendario.innerHTML = html;
-    }
-</script>
-
-<style>
-    .calendar {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 5px;
-    }
-    .day {
-        padding: 10px;
-        text-align: center;
-        border-radius: 5px;
-        color: white;
-        border: 1px solid black;
-    }
-    .day:hover {
-        opacity: 0.8;
-    }    
-</style>
