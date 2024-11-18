@@ -1,6 +1,6 @@
 # Ignorar carpeta media y migraciones
-media/
-**/migrations/
+#media/
+#**/migrations/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
