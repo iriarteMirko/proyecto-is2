@@ -2,22 +2,24 @@
     <h4 style="color: #2C3E50; font-weight: bold;">Horarios Disponibles</h4>
     {% if responsable %}
         {% if dias_horarios %}
-            <a href="" 
-                class="btn btn-success shadow-sm ms-2" 
-                style="font-weight: bold;">
+            <button class="btn btn-success shadow-sm ms-2" 
+                style="font-weight: bold;" 
+                data-bs-toggle="modal" 
+                data-bs-target="#modalAgregarHorario">
                 Agregar Horario
-            </a>
+            </button>
             <a href="" 
                 class="btn btn-warning shadow-sm ms-2" 
                 style="font-weight: bold;">
-                Editar Horarios
+                Editar Horario
             </a>
         {% else %}
-            <a href="" 
-                class="btn btn-success shadow-sm ms-2" 
-                style="font-weight: bold;">
+            <button class="btn btn-success shadow-sm ms-2" 
+                style="font-weight: bold;" 
+                data-bs-toggle="modal" 
+                data-bs-target="#modalAgregarHorario">
                 Agregar Horario
-            </a>
+            </button>
         {% endif %}
     {% endif %}
 </div>
@@ -41,3 +43,6 @@
         <p>No hay fechas disponibles en este momento.</p>
     {% endif %}
 </div>
+
+<!-- Modal para agregar horarios -->
+{% include "cancha/detalle_cancha/agregar_horario.html" %}

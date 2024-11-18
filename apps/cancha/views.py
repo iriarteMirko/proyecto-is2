@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib import messages
+from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from .serializer import CanchaSerializer
@@ -63,7 +64,8 @@ def detalle_cancha(request, cancha_id, cancha_slug):
     contexto = {
         'cancha': cancha,
         'responsable': responsable,
-        'dias_horarios': dias_horarios
+        'dias_horarios': dias_horarios,
+        'hoy': date.today().strftime('%Y-%m-%d')
     }
     return render(request, 'cancha/detalle_cancha/detalle_cancha.html', contexto)
 
@@ -185,3 +187,42 @@ def eliminar_cancha(request, cancha_id, cancha_slug):
         messages.success(request, 'La cancha fue eliminada correctamente.')
         return redirect('inicio')
 
+@login_required
+@require_POST
+def agregar_horario(request, cancha_id, cancha_slug):
+    if request.method == 'POST':
+        cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug)
+        dia = request.POST.get('dia')
+        hora_inicio = request.POST.get('hora_inicio')
+        hora_fin = request.POST.get('hora_fin')
+        try:
+            ahora = datetime.now()
+            print(ahora)
+            if isinstance(dia, str):
+                dia = datetime.strptime(dia, "%Y-%m-%d").date()
+            if isinstance(hora_inicio, str):
+                hora_inicio = datetime.strptime(hora_inicio, "%H:%M").time()
+            if isinstance(hora_fin, str):
+                hora_fin = datetime.strptime(hora_fin, "%H:%M").time()
+            
+            # Validar que el horario sea en una fecha y hora futuras
+            if dia < ahora.date() or (dia == ahora.date() and hora_inicio <= ahora.time()):
+                raise ValueError("El horario debe ser en una fecha y hora futuras.")
+            # Validar que hora de inicio debe ser antes de la hora de fin
+            if hora_inicio >= hora_fin:
+                raise ValueError("La hora de inicio debe ser menor que la hora de fin.")
+            # Validar que no exista un horario con el mismo dia y hora
+            if Horario.objects.filter(cancha_id=cancha_id, dia=dia).exists():
+                raise ValueError("Ya existe un horario para este día y cancha.")
+            
+            # Crear el horario
+            Horario.objects.create(
+                cancha=cancha,
+                dia=dia,
+                hora_inicio=hora_inicio,
+                hora_fin=hora_fin
+            )
+            messages.success(request, "Horario agregado exitosamente.")
+        except ValueError as e:
+            messages.error(request, str(e))
+        return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)

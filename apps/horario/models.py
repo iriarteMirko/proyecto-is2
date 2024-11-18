@@ -19,11 +19,10 @@ class Horario(models.Model):
         return f'{self.cancha.nombre} - {self.dia} de {self.hora_inicio} a {self.hora_fin}'
     
     def clean(self):
-        ahora = timezone.now()
+        ahora = datetime.now()
         
         if isinstance(self.dia, str):
             self.dia = datetime.strptime(self.dia, "%Y-%m-%d").date()
-        
         if isinstance(self.hora_inicio, str):
             self.hora_inicio = datetime.strptime(self.hora_inicio, "%H:%M").time()
         if isinstance(self.hora_fin, str):
@@ -32,7 +31,6 @@ class Horario(models.Model):
         # Validación: Solo permitir horarios en fechas futuras o la fecha actual en horas posteriores
         if self.dia < ahora.date() or (self.dia == ahora.date() and self.hora_inicio <= ahora.time()):
             raise ValidationError("El horario debe ser en una fecha y hora futuras.")
-        
         # Validación: La hora de inicio debe ser antes de la hora de fin
         if self.hora_inicio >= self.hora_fin:
             raise ValidationError("La hora de inicio debe ser anterior a la hora de fin.")
