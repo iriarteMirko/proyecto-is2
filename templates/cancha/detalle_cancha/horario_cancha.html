@@ -1,11 +1,24 @@
 <div class="d-flex justify-content-between align-items-center mt-4">
     <h4 style="color: #2C3E50; font-weight: bold;">Horarios Disponibles</h4>
     {% if responsable %}
-    <a href="" 
-        class="btn btn-warning shadow-sm ms-2" 
-        style="font-weight: bold;">
-        Editar Horarios
-    </a>
+        {% if dias_horarios %}
+            <a href="" 
+                class="btn btn-success shadow-sm ms-2" 
+                style="font-weight: bold;">
+                Agregar Horario
+            </a>
+            <a href="" 
+                class="btn btn-warning shadow-sm ms-2" 
+                style="font-weight: bold;">
+                Editar Horarios
+            </a>
+        {% else %}
+            <a href="" 
+                class="btn btn-success shadow-sm ms-2" 
+                style="font-weight: bold;">
+                Agregar Horario
+            </a>
+        {% endif %}
     {% endif %}
 </div>
 <div class="mb-4 mt-4">
