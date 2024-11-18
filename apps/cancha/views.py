@@ -65,7 +65,8 @@ def detalle_cancha(request, cancha_id, cancha_slug):
         'cancha': cancha,
         'responsable': responsable,
         'dias_horarios': dias_horarios,
-        'hoy': date.today().strftime('%Y-%m-%d')
+        'hoy': date.today().strftime('%Y-%m-%d'),
+        'horas': [f"{str(h).zfill(2)}:00" for h in range(24)]
     }
     return render(request, 'cancha/detalle_cancha/detalle_cancha.html', contexto)
 
@@ -214,7 +215,7 @@ def agregar_horario(request, cancha_id, cancha_slug):
             # Validar que no exista un horario con el mismo dia y hora
             if Horario.objects.filter(cancha_id=cancha_id, dia=dia).exists():
                 raise ValueError("Ya existe un horario para este día y cancha.")
-            
+
             # Crear el horario
             Horario.objects.create(
                 cancha=cancha,
