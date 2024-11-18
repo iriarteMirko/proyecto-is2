@@ -215,7 +215,7 @@ def agregar_horario(request, cancha_id, cancha_slug):
             # Validar que no exista un horario con el mismo dia y hora
             if Horario.objects.filter(cancha_id=cancha_id, dia=dia).exists():
                 raise ValueError("Ya existe un horario para este día y cancha.")
-
+            
             # Crear el horario
             Horario.objects.create(
                 cancha=cancha,
@@ -227,3 +227,22 @@ def agregar_horario(request, cancha_id, cancha_slug):
         except ValueError as e:
             messages.error(request, str(e))
         return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)
+
+@login_required
+@require_POST
+def editar_horarios_dia(request, cancha_id, cancha_slug):
+    cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug, responsable=request.user)
+    dia = request.POST.get('dia')
+    horarios_existentes = Horario.objects.filter(cancha=cancha, dia=dia)
+    try:
+        for horario in horarios_existentes:
+            hora_inicio = request.POST.get(f"hora_inicio_{horario.id}")
+            hora_fin = request.POST.get(f"hora_fin_{horario.id}")
+            if hora_inicio and hora_fin:
+                horario.hora_inicio = hora_inicio
+                horario.hora_fin = hora_fin
+                horario.save()
+        messages.success(request, f"Horarios del día {dia} actualizados exitosamente.")
+    except Exception as e:
+        messages.error(request, f"Error al editar horarios: {str(e)}")
+    return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)

@@ -1,26 +1,12 @@
 <div class="d-flex justify-content-between align-items-center mt-4">
     <h4 style="color: #2C3E50; font-weight: bold;">Horarios Disponibles</h4>
     {% if responsable %}
-        {% if dias_horarios %}
-            <button class="btn btn-success shadow-sm ms-2" 
-                style="font-weight: bold;" 
-                data-bs-toggle="modal" 
-                data-bs-target="#modalAgregarHorario">
-                Agregar Horario
-            </button>
-            <a href="" 
-                class="btn btn-warning shadow-sm ms-2" 
-                style="font-weight: bold;">
-                Editar Horario
-            </a>
-        {% else %}
-            <button class="btn btn-success shadow-sm ms-2" 
-                style="font-weight: bold;" 
-                data-bs-toggle="modal" 
-                data-bs-target="#modalAgregarHorario">
-                Agregar Horario
-            </button>
-        {% endif %}
+        <button class="btn btn-success shadow-sm ms-2" 
+            style="font-weight: bold;" 
+            data-bs-toggle="modal" 
+            data-bs-target="#modalAgregarHorario">
+            Agregar Horario
+        </button>
     {% endif %}
 </div>
 <div class="mb-4 mt-4">
@@ -28,7 +14,28 @@
         <ul class="list-group">
             {% for fecha_dia in dias_horarios %}
                 <li class="list-group-item">
-                    <strong>{{ fecha_dia.dia }}</strong>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong>{{ fecha_dia.dia }}</strong>
+                        {% if responsable %}
+                            <div>
+                                <!-- Botón para editar todos los horarios de un día -->
+                                <button 
+                                    class="btn btn-warning btn-sm me-2" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#modalEditarHorarios{{ forloop.counter }}">
+                                    Editar
+                                </button>
+                                <!-- Botón para eliminar todos los horarios de un día -->
+                                <form method="POST" action="" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="dia" value="{{ fecha_dia.dia }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        Eliminar
+                                    </button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    </div>
                     <ul>
                         {% for horario in fecha_dia.horarios %}
                             <li>
@@ -46,3 +53,5 @@
 
 <!-- Modal para agregar horarios -->
 {% include "cancha/detalle_cancha/agregar_horario.html" %}
+<!-- Modal para editar horarios -->
+{% include "cancha/detalle_cancha/editar_horario.html" %}
