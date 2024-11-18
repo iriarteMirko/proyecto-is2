@@ -184,3 +184,4 @@ def eliminar_cancha(request, cancha_id, cancha_slug):
         cancha.delete()
         messages.success(request, 'La cancha fue eliminada correctamente.')
         return redirect('inicio')
+
