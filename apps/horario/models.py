@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from apps.cancha.models import Cancha
-from datetime import datetime
+from datetime import datetime, time
 
 class Horario(models.Model):
     cancha = models.ForeignKey(Cancha, on_delete=models.CASCADE, related_name='horarios')
@@ -34,6 +34,9 @@ class Horario(models.Model):
         # Validación: La hora de inicio debe ser antes de la hora de fin
         if self.hora_inicio >= self.hora_fin:
             raise ValidationError("La hora de inicio debe ser anterior a la hora de fin.")
+        # Validación: La hora de fin puede ser 23:59 pero no más allá
+        if self.hora_fin > time(23, 59):
+            raise ValidationError("La hora de fin no puede superar las 23:59.")
     
     def save(self, *args, **kwargs):
         self.clean()

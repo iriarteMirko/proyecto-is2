@@ -36,7 +36,10 @@ def obtener_dias_horarios(cancha):
         # Generar todas las horas entre 00:00 y 23:00
         for h in range(24):
             hora_inicio = time(hour=h, minute=0)
-            hora_fin = (datetime.combine(today, hora_inicio) + timedelta(hours=1)).time()
+            if h == 23:  # Último bloque del día
+                hora_fin = time(hour=23, minute=59)
+            else:
+                hora_fin = (datetime.combine(today, hora_inicio) + timedelta(hours=1)).time()
             # Buscar si la hora está dentro de algún horario creado
             horario_encontrado = next(
                 (horario for horario in horarios_dia if horario.hora_inicio <= hora_inicio < horario.hora_fin),
@@ -247,7 +250,7 @@ def editar_horarios_dia(request, cancha_id, cancha_slug):
     dia = request.POST.get('dia')
     hora_inicio = request.POST.get('hora_inicio')
     hora_fin = request.POST.get('hora_fin')
-    print(dia, hora_inicio, hora_fin)
+    
     try:
         # Validación de existencia de horarios para el día seleccionado
         horarios_existentes = Horario.objects.filter(cancha=cancha, dia=dia)
@@ -265,6 +268,9 @@ def editar_horarios_dia(request, cancha_id, cancha_slug):
         hora_fin_dt = datetime.strptime(hora_fin, "%H:%M").time()
         if hora_inicio_dt >= hora_fin_dt:
             messages.error(request, "La hora de inicio debe ser anterior a la hora de fin.")
+            return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)
+        if hora_fin_dt > time(23, 59):
+            messages.error(request, "La hora de fin no puede superar las 23:59.")
             return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)
         
         # Actualizar los horarios
