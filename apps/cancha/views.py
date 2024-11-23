@@ -175,7 +175,6 @@ def cambiar_imagen(request):
             user.imagen = 'usuarios/default-avatar.jpg'
             user.save()
             return redirect('perfil', user.id, user.slug)
-    return render(request, 'usuario/editar_perfil/editar_perfil.html', {'user': user})
 
 @login_required
 @require_POST
@@ -200,7 +199,6 @@ def agregar_horario(request, cancha_id, cancha_slug):
         hora_fin = request.POST.get('hora_fin')
         try:
             ahora = datetime.now()
-            print(ahora)
             if isinstance(dia, str):
                 dia = datetime.strptime(dia, "%Y-%m-%d").date()
             if isinstance(hora_inicio, str):
@@ -229,8 +227,6 @@ def agregar_horario(request, cancha_id, cancha_slug):
         except ValueError as e:
             messages.error(request, str(e))
         return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)
-
-from django.http import JsonResponse
 
 @login_required
 @require_POST
@@ -268,4 +264,21 @@ def editar_horarios_dia(request, cancha_id, cancha_slug):
         messages.success(request, f"Horarios del día {dia} actualizados exitosamente.")
     except Exception as e:
         messages.error(request, f"Error al editar horarios: {str(e)}")
+    return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)
+
+@login_required
+@require_POST
+def eliminar_horarios_dia(request, cancha_id, cancha_slug):
+    cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug, responsable=request.user)
+    dia = request.POST.get('dia')
+    
+    try:
+        # Eliminar todos los horarios asociados al día y a la cancha seleccionada
+        horarios_eliminados = Horario.objects.filter(cancha=cancha, dia=dia).delete()
+        if horarios_eliminados[0] > 0:  # Chequea si se eliminaron registros
+            messages.success(request, f"Todos los horarios del día {dia} han sido eliminados.")
+        else:
+            messages.warning(request, f"No se encontraron horarios para el día {dia}.")
+    except Exception as e:
+        messages.error(request, f"Error al eliminar horarios: {str(e)}")
     return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)

@@ -26,13 +26,12 @@
                                     Editar
                                 </button>
                                 <!-- Botón para eliminar todos los horarios de un día -->
-                                <form method="POST" action="" style="display: inline;">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="dia" value="{{ fecha_dia.dia }}">
-                                    <button type="submit" class="btn btn-danger btn-sm">
-                                        Eliminar
-                                    </button>
-                                </form>
+                                <button 
+                                    type="submit" class="btn btn-danger btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalEliminarHorarios{{ forloop.counter }}">
+                                    Eliminar
+                                </button>
                             </div>
                         {% endif %}
                     </div>
@@ -46,6 +45,8 @@
                 </li>
                 <!-- Modal para editar horarios -->
                 {% include "cancha/detalle_cancha/editar_horario.html" %}
+                <!-- Modal para eliminar horarios -->
+                {% include "cancha/detalle_cancha/eliminar_horario.html" %}
             {% endfor %}
         </ul>
     {% else %}
