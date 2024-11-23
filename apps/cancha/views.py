@@ -10,7 +10,9 @@ from apps.usuario.factory import CanchaConcreteFactory
 from apps.horario.models import Horario
 from apps.reserva.models import Reserva
 from .models import Cancha
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta, datetime, time
+from itertools import groupby
+from operator import attrgetter
 import re
 
 class CanchaViewSet(viewsets.ModelViewSet):
@@ -23,52 +25,62 @@ class CanchaViewSet(viewsets.ModelViewSet):
         serializer.save(responsable=self.request.user)
 
 def obtener_dias_horarios(cancha):
-    today = date.today()
-    start_date = today.replace(day=1)
-    end_date = (start_date + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+    horarios = Horario.objects.filter(cancha=cancha).order_by('dia', 'hora_inicio')
+    today = datetime.now().date()
     
-    horarios = Horario.objects.filter(cancha=cancha, dia__range=(start_date, end_date))
     dias_horarios = []
     
-    for horario in horarios:
-        reservas = Reserva.objects.filter(horario=horario)
-        horarios_disponibles = []
-        
-        # Solo añadimos el horario disponible si no está reservado
-        for i in range(horario.hora_inicio.hour, horario.hora_fin.hour):
-            hora_inicio = horario.hora_inicio.replace(hour=i, minute=0, second=0)
-            hora_inicio_datetime = datetime.combine(horario.dia, hora_inicio)
-            hora_fin = (hora_inicio_datetime + timedelta(hours=1)).time()
-            
-            if not reservas.filter(hora_reserva_inicio=hora_inicio, hora_reserva_fin=hora_fin).exists():
-                horarios_disponibles.append({
-                    "hora_inicio": hora_inicio.strftime("%H:%M"),
-                    "hora_fin": hora_fin.strftime("%H:%M"),
-                })
-        
-        # Agrega solo los días que tienen horarios disponibles
-        if horarios_disponibles:
-            dias_horarios.append({
-                "dia": horario.dia.strftime("%Y-%m-%d"),
-                "horarios": horarios_disponibles,
-                "hora_inicio": horarios_disponibles[0]["hora_inicio"],
-                "hora_fin": horarios_disponibles[-1]["hora_fin"],
+    for dia, horarios_dia in groupby(horarios, key=attrgetter('dia')):
+        horarios_dia = list(horarios_dia)
+        horas_dia = []
+        # Generar todas las horas entre 00:00 y 23:00
+        for h in range(24):
+            hora_inicio = time(hour=h, minute=0)
+            hora_fin = (datetime.combine(today, hora_inicio) + timedelta(hours=1)).time()
+            # Buscar si la hora está dentro de algún horario creado
+            horario_encontrado = next(
+                (horario for horario in horarios_dia if horario.hora_inicio <= hora_inicio < horario.hora_fin),
+                None
+            )
+            if horario_encontrado:
+                # Verificar si está reservado
+                reservado = Reserva.objects.filter(
+                    horario=horario_encontrado,
+                    hora_reserva_inicio=hora_inicio,
+                    hora_reserva_fin=hora_fin
+                ).exists()
+                if reservado:
+                    estado = "rojo"  # Reservado
+                else:
+                    estado = "verde"  # Disponible
+            else:
+                estado = "gris"  # Sin horario
+            # Añadir bloque de hora
+            horas_dia.append({
+                "hora_inicio": hora_inicio.strftime('%H:%M'),
+                "hora_fin": hora_fin.strftime('%H:%M'),
+                "estado": estado,
             })
-    
+        # Agregar información del día
+        dias_horarios.append({
+            "dia": dia.strftime('%Y-%m-%d'),
+            "horas": horas_dia,
+            "hora_inicio": horarios_dia[0].hora_inicio.strftime('%H:%M') if horarios_dia else None,
+            "hora_fin": horarios_dia[-1].hora_fin.strftime('%H:%M') if horarios_dia else None,
+        })
     return dias_horarios
 
 @login_required
 def detalle_cancha(request, cancha_id, cancha_slug):
     cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug)
-    responsable = request.user == cancha.responsable
     dias_horarios = obtener_dias_horarios(cancha)
     
     contexto = {
         'cancha': cancha,
-        'responsable': responsable,
+        'responsable': request.user == cancha.responsable,
         'dias_horarios': dias_horarios,
-        'hoy': date.today().strftime('%Y-%m-%d'),
-        'horas': [f"{str(h).zfill(2)}:00" for h in range(24)]
+        'horas': [time(hour=h).strftime('%H:%M') for h in range(24)],  # Horas de 00:00 a 23:59
+        'hoy': datetime.now().date().strftime('%Y-%m-%d'),
     }
     return render(request, 'cancha/detalle_cancha/detalle_cancha.html', contexto)
 
@@ -235,7 +247,7 @@ def editar_horarios_dia(request, cancha_id, cancha_slug):
     dia = request.POST.get('dia')
     hora_inicio = request.POST.get('hora_inicio')
     hora_fin = request.POST.get('hora_fin')
-    
+    print(dia, hora_inicio, hora_fin)
     try:
         # Validación de existencia de horarios para el día seleccionado
         horarios_existentes = Horario.objects.filter(cancha=cancha, dia=dia)
@@ -271,7 +283,7 @@ def editar_horarios_dia(request, cancha_id, cancha_slug):
 def eliminar_horarios_dia(request, cancha_id, cancha_slug):
     cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug, responsable=request.user)
     dia = request.POST.get('dia')
-    
+    print(dia)
     try:
         # Eliminar todos los horarios asociados al día y a la cancha seleccionada
         horarios_eliminados = Horario.objects.filter(cancha=cancha, dia=dia).delete()

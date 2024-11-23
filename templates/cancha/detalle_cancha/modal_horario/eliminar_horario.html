@@ -4,13 +4,13 @@
             <form method="POST" action="{% url 'eliminar_horarios_dia' cancha.id cancha.slug %}">
                 {% csrf_token %}
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalEliminarHorariosLabel">Eliminar Horarios del {{ fecha_dia.dia }}</h5>
+                    <h5 class="modal-title" id="modalEliminarHorariosLabel">Eliminar Horarios del {{ dia.dia }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>¿Estás seguro de que deseas eliminar todos los horarios del día <strong>{{ fecha_dia.dia }}</strong>?</p>
+                    <p>¿Estás seguro de que deseas eliminar todos los horarios del día <strong>{{ dia.dia }}</strong>?</p>
                 </div>
-                <input type="hidden" name="dia" value="{{ fecha_dia.dia }}">
+                <input type="hidden" name="dia" value="{{ dia.dia }}">
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-danger">Eliminar</button>

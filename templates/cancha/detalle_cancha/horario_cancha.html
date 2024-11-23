@@ -11,48 +11,113 @@
 </div>
 <div class="mb-4 mt-4">
     {% if dias_horarios %}
-        <ul class="list-group">
-            {% for fecha_dia in dias_horarios %}
-                <li class="list-group-item">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <strong>{{ fecha_dia.dia }}</strong>
-                        {% if responsable %}
-                            <div>
-                                <!-- Botón para editar todos los horarios de un día -->
-                                <button 
-                                    class="btn btn-warning btn-sm me-2" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#modalEditarHorarios{{ forloop.counter }}">
-                                    Editar
-                                </button>
-                                <!-- Botón para eliminar todos los horarios de un día -->
-                                <button 
-                                    type="submit" class="btn btn-danger btn-sm"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#modalEliminarHorarios{{ forloop.counter }}">
-                                    Eliminar
-                                </button>
-                            </div>
-                        {% endif %}
-                    </div>
-                    <ul>
-                        {% for horario in fecha_dia.horarios %}
-                            <li>
-                                <span style="color: green;">{{ horario.hora_inicio }} - {{ horario.hora_fin }}</span>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </li>
-                <!-- Modal para editar horarios -->
-                {% include "cancha/detalle_cancha/modal_horario/editar_horario.html" %}
-                <!-- Modal para eliminar horarios -->
-                {% include "cancha/detalle_cancha/modal_horario/eliminar_horario.html" %}
-            {% endfor %}
-        </ul>
+        {% for dia in dias_horarios %}
+        <div class="day-block my-3">
+            <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded">
+                <h5 class="mb-0" style="font-weight: bold; color: #4CAF50;">{{ dia.dia }}</h5>
+                {% if responsable %}
+                <div>
+                    <!-- Botón para editar todos los horarios de un día -->
+                    <button 
+                        class="btn btn-warning btn-sm me-2" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#modalEditarHorarios{{ forloop.counter }}">
+                        Editar
+                    </button>
+                    <!-- Botón para eliminar todos los horarios de un día -->
+                    <button 
+                        class="btn btn-danger btn-sm"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalEliminarHorarios{{ forloop.counter }}">
+                        Eliminar
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+            <div class="hour-grid mt-3 d-flex flex-wrap">
+                {% for hora in dia.horas %}
+                <div 
+                    class="hour-block {{ hora.estado }} m-2"
+                    title="{{ hora.hora_inicio }} - {{ hora.hora_fin }}"
+                    data-bs-toggle="tooltip">
+                    {{ hora.hora_inicio }} - {{ hora.hora_fin }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <!-- Modales para editar y eliminar horarios -->
+        {% include "cancha/detalle_cancha/modal_horario/editar_horario.html" %}
+        {% include "cancha/detalle_cancha/modal_horario/eliminar_horario.html" %}
+        {% endfor %}
     {% else %}
-        <p>No hay fechas disponibles en este momento.</p>
+        <p>No hay horarios disponibles en este momento.</p>
     {% endif %}
 </div>
 
 <!-- Modal para agregar horarios -->
 {% include "cancha/detalle_cancha/modal_horario/agregar_horario.html" %}
+
+<style>
+    /* Contenedor del día */
+    .day-block {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 15px;
+        background-color: #f9f9f9;
+    }
+    
+    /* Grilla de horarios */
+    .hour-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+    
+    /* Bloques de horario */
+    .hour-block {
+        width: 100px;
+        height: 50px;
+        margin: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 5px;
+        text-align: center;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    
+    /* Colores de estado */
+    .hour-block.gris {
+        background-color: #d3d3d3; /* Gris */
+        color: black;
+        border: 1px solid #bbb;
+    }
+    
+    .hour-block.verde {
+        background-color: #4caf50; /* Verde */
+        color: white;
+        border: 1px solid #3e8e41;
+    }
+    
+    .hour-block.rojo {
+        background-color: #f44336; /* Rojo */
+        color: white;
+        border: 1px solid #e53935;
+    }
+    
+    /* Hover para bloques */
+    .hour-block:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+    }
+    
+    /* Contenedor responsivo */
+    @media (max-width: 768px) {
+        .hour-block {
+            width: 80px;
+            height: 40px;
+            font-size: 10px;
+        }
+    }    
+</style>
