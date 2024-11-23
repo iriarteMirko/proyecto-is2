@@ -54,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'apps.horario.middleware.auto_delete_old_horarios.AutoDeleteOldHorariosMiddleware',
 ]
 
 ROOT_URLCONF = 'reserva_tu_cancha.urls'

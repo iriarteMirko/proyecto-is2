@@ -44,6 +44,8 @@
                         {% endfor %}
                     </ul>
                 </li>
+                <!-- Modal para editar horarios -->
+                {% include "cancha/detalle_cancha/editar_horario.html" %}
             {% endfor %}
         </ul>
     {% else %}
@@ -53,5 +55,3 @@
 
 <!-- Modal para agregar horarios -->
 {% include "cancha/detalle_cancha/agregar_horario.html" %}
-<!-- Modal para editar horarios -->
-{% include "cancha/detalle_cancha/editar_horario.html" %}
