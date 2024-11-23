@@ -329,13 +329,13 @@ def reservar_horario(request, cancha_id, cancha_slug, horario_id, hora_inicio, h
     horario = get_object_or_404(Horario, id=horario_id, cancha=cancha)
     
     try:
-        hora_inicio_obj = time.fromisoformat(hora_inicio)
-        hora_fin_obj = time.fromisoformat(hora_fin)
-        print(hora_inicio_obj, hora_fin_obj)
+        hora_inicio_obj = hora_inicio if isinstance(hora_inicio, time) else time.fromisoformat(hora_inicio)
+        hora_fin_obj = hora_fin if isinstance(hora_fin, time) else time.fromisoformat(hora_fin)
+        
         # Validar que las horas sean consistentes con el horario general
         if not (horario.hora_inicio <= hora_inicio_obj < hora_fin_obj <= horario.hora_fin):
             messages.error(request, "El rango de horas no es válido dentro del horario disponible.")
-            return redirect('detalle_horario', cancha.id, cancha.slug, horario.id, hora_inicio, hora_fin)
+            return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)
         
         # Validar si el rango de horas ya está reservado
         reservas_conflictivas = Reserva.objects.filter(
@@ -344,8 +344,11 @@ def reservar_horario(request, cancha_id, cancha_slug, horario_id, hora_inicio, h
             hora_reserva_fin__gt=hora_inicio_obj
         )
         if reservas_conflictivas.exists():
-            messages.error(request, "Este rango de horario ya está reservado.")
-            return redirect('detalle_horario', cancha.id, cancha.slug, horario.id, hora_inicio, hora_fin)
+            hora_inicio = reservas_conflictivas.first().hora_reserva_inicio.strftime('%H:%M')
+            hora_fin = reservas_conflictivas.first().hora_reserva_fin.strftime('%H:%M')
+            messages.error(request, "Este horario ya está reservado.")
+            return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)
+        
         # Crear la reserva
         Reserva.objects.create(
             usuario=request.user,
