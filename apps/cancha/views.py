@@ -60,6 +60,7 @@ def obtener_dias_horarios(cancha):
                 estado = "gris"  # Sin horario
             # Añadir bloque de hora
             horas_dia.append({
+                "id": horario_encontrado.id if horario_encontrado else None,
                 "hora_inicio": hora_inicio.strftime('%H:%M'),
                 "hora_fin": hora_fin.strftime('%H:%M'),
                 "estado": estado,
@@ -299,4 +300,53 @@ def eliminar_horarios_dia(request, cancha_id, cancha_slug):
             messages.warning(request, f"No se encontraron horarios para el día {dia}.")
     except Exception as e:
         messages.error(request, f"Error al eliminar horarios: {str(e)}")
+    return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)
+
+@login_required
+def detalle_horario(request, cancha_id, cancha_slug, horario_id, hora_inicio, hora_fin):
+    cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug)
+    horario = get_object_or_404(Horario, id=horario_id, cancha=cancha)
+    precio = 100  # Precio ficticio por hora
+    
+    # Convertir las horas de inicio y fin de la URL
+    hora_inicio_obj = datetime.strptime(hora_inicio, "%H:%M").time()
+    hora_fin_obj = datetime.strptime(hora_fin, "%H:%M").time()
+    
+    contexto = {
+        'cancha': cancha,
+        'horario': horario,
+        'hora_inicio': hora_inicio_obj,
+        'hora_fin': hora_fin_obj,
+        'responsable': cancha.responsable,
+        'precio': precio,
+    }
+    return render(request, 'cancha/detalle_cancha/reservar_horario/detalle_horario.html', contexto)
+
+@login_required
+@require_POST
+def reservar_horario(request, cancha_id, cancha_slug, horario_id):
+    cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug)
+    horario = get_object_or_404(Horario, id=horario_id, cancha=cancha)
+    
+    try:
+        # Validar si el horario ya está reservado
+        reservas_conflictivas = Reserva.objects.filter(
+            horario=horario,
+            hora_reserva_inicio=horario.hora_inicio,
+            hora_reserva_fin=horario.hora_fin
+        )
+        if reservas_conflictivas.exists():
+            messages.error(request, "Este horario ya está reservado.")
+            return redirect('detalle_horario', cancha.id, cancha.slug, horario.id)
+        # Crear la reserva
+        Reserva.objects.create(
+            usuario=request.user,
+            horario=horario,
+            hora_reserva_inicio=horario.hora_inicio,
+            hora_reserva_fin=horario.hora_fin,
+        )
+        messages.success(request, "El horario ha sido reservado exitosamente.")
+    except Exception as e:
+        messages.error(request, f"Error al reservar el horario: {e}")
+    
     return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)

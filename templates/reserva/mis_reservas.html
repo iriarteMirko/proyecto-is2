@@ -1,0 +1,23 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+
+<main class="container py-5">
+    <h3>Mis Reservas</h3>
+    {% if reservas %}
+        <div class="list-group">
+            {% for reserva in reservas %}
+            <div class="list-group-item">
+                <h5>{{ reserva.horario.cancha.nombre }}</h5>
+                <p><strong>Fecha:</strong> {{ reserva.horario.dia }}</p>
+                <p><strong>Horario:</strong> {{ reserva.hora_reserva_inicio }} - {{ reserva.hora_reserva_fin }}</p>
+                <p><strong>Reservado el:</strong> {{ reserva.fecha_reserva }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No tienes reservas vigentes.</p>
+    {% endif %}
+</main>
+
+{% endblock %}

@@ -1,3 +1,5 @@
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
@@ -31,3 +33,12 @@ class ReservaViewSet(viewsets.ModelViewSet):
     
     def destroy(self, request, *args, **kwargs):
         return super(ReservaViewSet, self).destroy(request, *args, **kwargs)
+
+@login_required
+def mis_reservas(request):
+    reservas = Reserva.objects.filter(usuario=request.user).select_related('horario', 'horario__cancha')
+    
+    contexto = {
+        'reservas': reservas,
+    }
+    return render(request, 'reservas/mis_reservas.html', contexto)

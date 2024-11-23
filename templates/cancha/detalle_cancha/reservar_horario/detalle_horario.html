@@ -1,0 +1,92 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+
+{% load static %}
+
+<main class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Card principal -->
+            <div class="card shadow-lg position-relative">
+                <!-- Imagen de la cancha -->
+                <img src="{% if cancha.imagen %}{{ cancha.imagen.url }}{% else %}{% static 'images/default-cancha.jpg' %}{% endif %}"
+                    class="card-img-top" 
+                    alt="Imagen de {{ cancha.nombre }}" 
+                    style="height: 350px; object-fit: cover;">
+                <!-- Cuerpo de la tarjeta -->
+                <div class="card-body p-5">
+                    <!-- Título y botón de regreso -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="text flex-grow-1" style="color: #4CAF50; font-weight: bold; margin: 0;">
+                            {{ cancha.nombre }}
+                        </h2>
+                        <a href="{% url 'detalle_cancha' cancha.id cancha.slug %}" 
+                            class="btn btn-secondary shadow-sm" 
+                            style="background-color: #2C3E50; color: #fff; font-weight: bold;">
+                            <i class="bi bi-arrow-left me-1"></i> Volver
+                        </a>
+                    </div>
+                    <hr>
+                    <!-- Información del horario -->
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item">
+                            <strong style="color: #F1C40F;">Fecha:</strong> 
+                            {{ horario.dia|date:"M. d, Y" }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong style="color: #F1C40F;">Horario:</strong> 
+                            {{ hora_inicio|time:"g:i a" }} - {{ hora_fin|time:"g:i a" }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong style="color: #F1C40F;">Responsable:</strong> 
+                            <a href="{% url 'perfil' responsable.id responsable.slug %}" 
+                                class="text-decoration-none fw text-primary d-inline-flex align-items-center">
+                                <span class="me-1" style="color: #4CAF50;">{{ responsable }}</span>
+                                <i class="bi bi-person-circle" style="color: #4CAF50;"></i>
+                            </a>
+                        </li>
+                        <li class="list-group-item">
+                            <strong style="color: #F1C40F;">Precio de reserva:</strong> 
+                            S/ {{ precio }}
+                        </li>
+                    </ul>
+                    <!-- Botón para reservar -->
+                    <form method="POST" action="">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success btn-lg w-100 shadow-sm" style="font-weight: bold;">
+                            Reservar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    .btn-success {
+        background-color: #4CAF50; /* Verde principal */
+        color: white;
+        border: none;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .btn-success:hover {
+        background-color: #45a049; /* Verde más claro */
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .btn-success:active {
+        background-color: #388E3C;
+        transform: translateY(1px);
+        box-shadow: none;
+    }
+    .btn-secondary {
+        background-color: #2C3E50; /* Gris oscuro */
+    }
+    .btn-secondary:hover {
+        background-color: #34495E; /* Gris más claro */
+    }
+</style>
+
+{% endblock %}

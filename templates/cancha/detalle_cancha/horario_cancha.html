@@ -59,7 +59,13 @@
                                 class="hour-block {{ hora.estado }} m-2"
                                 title="{{ hora.hora_inicio }} - {{ hora.hora_fin }}"
                                 data-bs-toggle="tooltip">
-                                {{ hora.hora_inicio }} - {{ hora.hora_fin }}
+                                {% if hora.id %}
+                                    <a href="{% url 'detalle_horario' cancha.id cancha.slug hora.id hora.hora_inicio hora.hora_fin %}" class="text-white text-decoration-none">
+                                        {{ hora.hora_inicio }} - {{ hora.hora_fin }}
+                                    </a>
+                                {% else %}
+                                    {{ hora.hora_inicio }} - {{ hora.hora_fin }}
+                                {% endif %}
                             </div>
                             {% endfor %}
                         </div>
