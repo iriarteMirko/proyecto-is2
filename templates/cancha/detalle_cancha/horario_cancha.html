@@ -55,19 +55,13 @@
                         <!-- Grilla de horarios -->
                         <div class="hour-grid d-flex flex-wrap">
                             {% for hora in dia.horas %}
-                            <div 
-                                class="hour-block {{ hora.estado }} m-2"
+                            <a 
+                                href="{% if hora.id and hora.estado == 'verde' %}{% url 'detalle_horario' cancha.id cancha.slug hora.id hora.hora_inicio hora.hora_fin %}{% else %}#{% endif %}" 
+                                class="hour-block {{ hora.estado }} m-2 text-decoration-none d-flex justify-content-center align-items-center"
                                 title="{{ hora.hora_inicio }} - {{ hora.hora_fin }}"
-                                data-bs-toggle="tooltip">
-                                {% if hora.id and hora.estado == 'verde' %}
-                                    <a href="{% url 'detalle_horario' cancha.id cancha.slug hora.id hora.hora_inicio hora.hora_fin %}" 
-                                    class="text-white text-decoration-none">
-                                        {{ hora.hora_inicio }} - {{ hora.hora_fin }}
-                                    </a>
-                                {% else %}
-                                    <span class="text-white">{{ hora.hora_inicio }} - {{ hora.hora_fin }}</span>
-                                {% endif %}
-                            </div>
+                                style="{% if not hora.id or hora.estado != 'verde' %}pointer-events: none;{% endif %}">
+                                <span class="text-white">{{ hora.hora_inicio }} - {{ hora.hora_fin }}</span>
+                            </a>
                             {% endfor %}
                         </div>
                     </div>
