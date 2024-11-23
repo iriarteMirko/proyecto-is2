@@ -324,28 +324,38 @@ def detalle_horario(request, cancha_id, cancha_slug, horario_id, hora_inicio, ho
 
 @login_required
 @require_POST
-def reservar_horario(request, cancha_id, cancha_slug, horario_id):
+def reservar_horario(request, cancha_id, cancha_slug, horario_id, hora_inicio, hora_fin):
     cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug)
     horario = get_object_or_404(Horario, id=horario_id, cancha=cancha)
     
     try:
-        # Validar si el horario ya está reservado
+        hora_inicio_obj = time.fromisoformat(hora_inicio)
+        hora_fin_obj = time.fromisoformat(hora_fin)
+        print(hora_inicio_obj, hora_fin_obj)
+        # Validar que las horas sean consistentes con el horario general
+        if not (horario.hora_inicio <= hora_inicio_obj < hora_fin_obj <= horario.hora_fin):
+            messages.error(request, "El rango de horas no es válido dentro del horario disponible.")
+            return redirect('detalle_horario', cancha.id, cancha.slug, horario.id, hora_inicio, hora_fin)
+        
+        # Validar si el rango de horas ya está reservado
         reservas_conflictivas = Reserva.objects.filter(
             horario=horario,
-            hora_reserva_inicio=horario.hora_inicio,
-            hora_reserva_fin=horario.hora_fin
+            hora_reserva_inicio__lt=hora_fin_obj,
+            hora_reserva_fin__gt=hora_inicio_obj
         )
         if reservas_conflictivas.exists():
-            messages.error(request, "Este horario ya está reservado.")
-            return redirect('detalle_horario', cancha.id, cancha.slug, horario.id)
+            messages.error(request, "Este rango de horario ya está reservado.")
+            return redirect('detalle_horario', cancha.id, cancha.slug, horario.id, hora_inicio, hora_fin)
         # Crear la reserva
         Reserva.objects.create(
             usuario=request.user,
             horario=horario,
-            hora_reserva_inicio=horario.hora_inicio,
-            hora_reserva_fin=horario.hora_fin,
+            hora_reserva_inicio=hora_inicio_obj,
+            hora_reserva_fin=hora_fin_obj,
         )
-        messages.success(request, "El horario ha sido reservado exitosamente.")
+        messages.success(request, f"Reserva exitosa: {hora_inicio_obj.strftime('%H:%M')} - {hora_fin_obj.strftime('%H:%M')}")
+    except ValueError:
+        messages.error(request, "Formato de hora inválido.")
     except Exception as e:
         messages.error(request, f"Error al reservar el horario: {e}")
     
