@@ -51,6 +51,8 @@ def obtener_dias_horarios(cancha):
             dias_horarios.append({
                 "dia": horario.dia.strftime("%Y-%m-%d"),
                 "horarios": horarios_disponibles,
+                "hora_inicio": horarios_disponibles[0]["hora_inicio"],
+                "hora_fin": horarios_disponibles[-1]["hora_fin"],
             })
     
     return dias_horarios
@@ -228,20 +230,41 @@ def agregar_horario(request, cancha_id, cancha_slug):
             messages.error(request, str(e))
         return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)
 
+from django.http import JsonResponse
+
 @login_required
 @require_POST
 def editar_horarios_dia(request, cancha_id, cancha_slug):
     cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug, responsable=request.user)
     dia = request.POST.get('dia')
-    horarios_existentes = Horario.objects.filter(cancha=cancha, dia=dia)
+    hora_inicio = request.POST.get('hora_inicio')
+    hora_fin = request.POST.get('hora_fin')
+    
     try:
+        # Validación de existencia de horarios para el día seleccionado
+        horarios_existentes = Horario.objects.filter(cancha=cancha, dia=dia)
+        if not horarios_existentes.exists():
+            messages.error(request, f"No hay horarios existentes para el día {dia}.")
+            return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)
+        
+        # Validaciones de entrada
+        if not hora_inicio or not hora_fin:
+            messages.error(request, "Debe especificar una hora de inicio y una hora de fin.")
+            return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)
+        
+        # Validar formato de las horas
+        hora_inicio_dt = datetime.strptime(hora_inicio, "%H:%M").time()
+        hora_fin_dt = datetime.strptime(hora_fin, "%H:%M").time()
+        if hora_inicio_dt >= hora_fin_dt:
+            messages.error(request, "La hora de inicio debe ser anterior a la hora de fin.")
+            return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)
+        
+        # Actualizar los horarios
         for horario in horarios_existentes:
-            hora_inicio = request.POST.get(f"hora_inicio_{horario.id}")
-            hora_fin = request.POST.get(f"hora_fin_{horario.id}")
-            if hora_inicio and hora_fin:
-                horario.hora_inicio = hora_inicio
-                horario.hora_fin = hora_fin
-                horario.save()
+            horario.hora_inicio = hora_inicio_dt
+            horario.hora_fin = hora_fin_dt
+            horario.save()
+        
         messages.success(request, f"Horarios del día {dia} actualizados exitosamente.")
     except Exception as e:
         messages.error(request, f"Error al editar horarios: {str(e)}")

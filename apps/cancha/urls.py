@@ -15,4 +15,5 @@ urlpatterns = [
     path('eliminar/<int:cancha_id>/<slug:cancha_slug>/', views.eliminar_cancha, name='eliminar_cancha'),
     path('agregar-horario/<int:cancha_id>/<slug:cancha_slug>/', views.agregar_horario, name='agregar_horario'),
     path('editar-horarios_dia/<int:cancha_id>/<slug:cancha_slug>/', views.editar_horarios_dia, name='editar_horarios_dia'),
+    #path('eliminar-horario/<int:horario_id>/', views.eliminar_horario, name='eliminar_horario'),
 ]
