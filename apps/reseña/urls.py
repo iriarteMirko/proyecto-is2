@@ -3,7 +3,7 @@ from rest_framework import routers
 from . import views
 
 router = routers.DefaultRouter()
-router.register(r'puntajes', views.PuntajeViewSet)
+router.register(r'reseñas', views.ReseñaViewSet)
 
 urlpatterns = [
     # Rutas de la API REST

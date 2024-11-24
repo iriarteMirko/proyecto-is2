@@ -12,7 +12,7 @@ urlpatterns = [
     path('direccion/', include('apps.direccion.urls')),
     path('horario/', include('apps.horario.urls')),
     path('reserva/', include('apps.reserva.urls')),
-    path('puntaje/', include('apps.puntaje.urls')),
+    path('reseña/', include('apps.reseña.urls')),
 ]
 
 if settings.DEBUG:

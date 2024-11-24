@@ -51,5 +51,5 @@ class Cancha(models.Model):
                 self.responsable.groups.add(cliente_group)
     
     def promedio_calificaciones(self):
-        promedio = self.puntajes.aggregate(models.Avg('calificacion'))['calificacion__avg']
+        promedio = self.reseñas.aggregate(models.Avg('calificacion'))['calificacion__avg']
         return round(promedio, 1) if promedio else "Sin calificaciones"

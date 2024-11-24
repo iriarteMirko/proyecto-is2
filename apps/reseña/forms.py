@@ -1,9 +1,9 @@
 from django import forms
-from .models import Puntaje
+from .models import Reseña
 
-class PuntajeForm(forms.ModelForm):
+class ReseñaForm(forms.ModelForm):
     class Meta:
-        model = Puntaje
+        model = Reseña
         fields = ['calificacion', 'comentario']
         widgets = {
             'calificacion': forms.RadioSelect(choices=[(i, f'{i} Estrella{"s" if i > 1 else ""}') for i in range(1, 6)]),
