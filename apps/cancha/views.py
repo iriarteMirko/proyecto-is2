@@ -77,10 +77,12 @@ def obtener_dias_horarios(cancha):
 def detalle_cancha(request, cancha_id, cancha_slug):
     cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug)
     dias_horarios = obtener_dias_horarios(cancha)
+    calificacion = cancha.promedio_calificaciones()
     
     contexto = {
         'cancha': cancha,
         'responsable': request.user == cancha.responsable,
+        'calificacion': calificacion,
         'dias_horarios': dias_horarios,
         'horas': [time(hour=h).strftime('%H:%M') for h in range(24)],  # Horas de 00:00 a 23:59
         'hoy': datetime.now().date().strftime('%Y-%m-%d'),
@@ -283,11 +285,11 @@ def editar_horarios_dia(request, cancha_id, cancha_slug):
         
         if reservas_en_conflicto:
             reservas_detalle = ", ".join(
-                f"{reserva}" for reserva in reservas_en_conflicto
+                f"Reserva de {reserva.usuario} de {reserva.hora_reserva_inicio} a {reserva.hora_reserva_fin}" for reserva in reservas_en_conflicto
             )
             messages.error(
                 request, 
-                f"No se pueden modificar los horarios porque existen reservas en conflicto: \n{reservas_detalle}."
+                f"No se pueden modificar los horarios porque existen reservas en conflicto: {reservas_detalle}."
             )
             return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)
         

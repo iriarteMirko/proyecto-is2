@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'apps.direccion',
     'apps.horario',
     'apps.reserva',
+    'apps.puntaje',
     
 ]
 

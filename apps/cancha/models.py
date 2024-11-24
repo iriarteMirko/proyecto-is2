@@ -49,3 +49,7 @@ class Cancha(models.Model):
             if responsable_group in self.responsable.groups.all():
                 self.responsable.groups.remove(responsable_group)
                 self.responsable.groups.add(cliente_group)
+    
+    def promedio_calificaciones(self):
+        promedio = self.puntajes.aggregate(models.Avg('calificacion'))['calificacion__avg']
+        return round(promedio, 1) if promedio else "Sin calificaciones"
