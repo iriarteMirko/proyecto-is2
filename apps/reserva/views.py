@@ -2,12 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views.decorators.cache import never_cache
-from django.utils.timezone import now
-from django.urls import reverse
-from django.http import Http404
-from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect
+from django.contrib import messages
+from django.urls import reverse
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -39,18 +37,6 @@ class ReservaViewSet(viewsets.ModelViewSet):
     
     def destroy(self, request, *args, **kwargs):
         return super(ReservaViewSet, self).destroy(request, *args, **kwargs)
-
-@login_required
-def mis_reservas(request):
-    reservas = Reserva.objects.filter(
-        usuario=request.user,
-        horario__dia__gte=now().date()
-    ).select_related('horario', 'horario__cancha').order_by('horario__dia', 'hora_reserva_inicio')
-    
-    contexto = {
-        'reservas': reservas,
-    }
-    return render(request, 'reserva/mis_reservas.html', contexto)
 
 @never_cache
 @login_required

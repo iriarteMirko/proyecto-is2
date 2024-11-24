@@ -3,12 +3,15 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.utils.timezone import now
 from django.contrib import messages
 from django.urls import reverse
 from rest_framework import viewsets
 from .serializer import UsuarioSerializer
 from .models import Usuario
 from .forms import RegistroUsuarioForm
+from apps.cancha.models import Cancha
+from apps.reserva.models import Reserva
 
 # ViewSet para la API REST
 class UsuarioViewSet(viewsets.ModelViewSet):
@@ -230,6 +233,26 @@ def eliminar_cuenta(request):
     else:
         messages.error(request, 'Contraseña incorrecta. No se pudo eliminar la cuenta.')
         return redirect('editar_perfil')
+
+@login_required
+def mis_reservas(request):
+    reservas = Reserva.objects.filter(
+        usuario=request.user,
+        horario__dia__gte=now().date()
+    ).select_related('horario', 'horario__cancha').order_by('horario__dia', 'hora_reserva_inicio')
+    
+    contexto = {
+        'reservas': reservas,
+    }
+    return render(request, 'reserva/mis_reservas.html', contexto)
+
+@login_required
+def mis_canchas(request):
+    canchas = Cancha.objects.filter(responsable=request.user).prefetch_related('direcciones')
+    contexto = {
+        'canchas': canchas,
+    }
+    return render(request, 'usuario/mis_canchas.html', contexto)
 
 def error_404_view(request, exception):
     return render(request, 'base/404.html', status=404)
