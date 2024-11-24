@@ -289,7 +289,7 @@ def editar_horarios_dia(request, cancha_id, cancha_slug):
 def eliminar_horarios_dia(request, cancha_id, cancha_slug):
     cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug, responsable=request.user)
     dia = request.POST.get('dia')
-    print(dia)
+    
     try:
         # Eliminar todos los horarios asociados al día y a la cancha seleccionada
         horarios_eliminados = Horario.objects.filter(cancha=cancha, dia=dia).delete()

@@ -6,11 +6,10 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <h6 style="color: #4CAF50; font-weight: bold;">Selecciona un nuevo horario:</h6>
+                <h6 style="color: #4CAF50;">Selecciona un nuevo horario:</h6>
                 <hr>
-                <form id="editarReservaForm" method="POST" action="{% url 'editar_reserva' reserva.id 0%}">
+                <form id="editarReservaForm" method="POST">
                     {% csrf_token %}
-                    <input type="hidden" id="horarioIdInput" name="horario_id">
                     <div class="hour-grid-container">
                         {% for dia in dias_horarios %}
                         <div class="day-section mb-4">
@@ -119,18 +118,30 @@
     document.addEventListener('DOMContentLoaded', function() {
         const hourBlocks = document.querySelectorAll('.hour-block.selectable');
         const guardarCambiosBtn = document.getElementById('guardar-cambios-btn');
-        const horarioIdInput = document.getElementById('horarioIdInput');
+        const editarReservaForm = document.getElementById('editarReservaForm');
         let selectedBlock = null;
         hourBlocks.forEach(block => {
             block.addEventListener('click', function() {
+                // Deseleccionar el bloque previo
                 if (selectedBlock) {
                     selectedBlock.classList.remove('selected');
                 }
+                // Seleccionar el bloque actual
                 this.classList.add('selected');
                 selectedBlock = this;
+                // Habilitar el botón de guardar cambios
                 guardarCambiosBtn.disabled = false;
-                horarioIdInput.value = this.getAttribute('data-horario-id');
+                // Extraer valores seleccionados
+                const horarioId = this.getAttribute('data-horario-id');
+                const nuevaHoraInicio = this.getAttribute('data-hora-inicio');
+                const nuevaHoraFin = this.getAttribute('data-hora-fin');
+                // Actualizar el `action` del formulario
+                editarReservaForm.action = `{% url 'editar_reserva' reserva.id 0 '00:00' '23:59' %}`
+                    .replace('/0/', `/${horarioId}/`)
+                    .replace('00:00', `${nuevaHoraInicio}`)
+                    .replace('23:59', `${nuevaHoraFin}`);
             });
         });
     });
 </script>
+

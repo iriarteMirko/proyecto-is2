@@ -98,7 +98,6 @@ def detalle_reserva(request, reserva_id):
     try:
         reserva = Reserva.objects.select_related('horario__cancha').get(id=reserva_id, usuario=request.user)
         dias_horarios = obtener_dias_horarios_reserva(reserva)
-        print(dias_horarios)
     except Reserva.DoesNotExist:
         messages.error(request, "La reserva que intentas ver ya no existe.")
         return redirect('mis_reservas')
@@ -112,31 +111,39 @@ def detalle_reserva(request, reserva_id):
 @never_cache
 @login_required
 @require_POST
-def editar_reserva(request, reserva_id, nuevo_horario_id):
+def editar_reserva(request, reserva_id, horario_id, nueva_hora_inicio_reserva, nueva_hora_fin_reserva):
     try:
+        # Convertir las horas de inicio y fin a objetos de tipo time
+        nueva_hora_inicio_obj = datetime.strptime(nueva_hora_inicio_reserva, '%H:%M').time()
+        nueva_hora_fin_obj = datetime.strptime(nueva_hora_fin_reserva, '%H:%M').time()
+        # Obtener la reserva actual
         reserva = get_object_or_404(Reserva, id=reserva_id, usuario=request.user)
-        nuevo_horario = get_object_or_404(Horario, id=nuevo_horario_id, cancha=reserva.horario.cancha)
-        
-        # Validar que el nuevo horario no esté reservado
+        # Validar que el horario con el ID proporcionado pertenece a la cancha de la reserva
+        nuevo_horario = get_object_or_404(Horario, id=horario_id, cancha=reserva.horario.cancha)
+        # Validar que el nuevo horario no esté reservado por otra persona
         reservado = Reserva.objects.filter(
             horario=nuevo_horario,
-            hora_reserva_inicio=nuevo_horario.hora_inicio,
-            hora_reserva_fin=nuevo_horario.hora_fin
+            hora_reserva_inicio=nueva_hora_inicio_obj,
+            hora_reserva_fin=nueva_hora_fin_obj
         ).exclude(id=reserva.id).exists()
         if reservado:
             messages.error(request, "El horario seleccionado ya está reservado.")
             return redirect('detalle_reserva', reserva_id=reserva.id)
-        
-        # Actualizar la reserva
+        # Actualizar la reserva con el nuevo horario y horas
         reserva.horario = nuevo_horario
-        reserva.hora_reserva_inicio = nuevo_horario.hora_inicio
-        reserva.hora_reserva_fin = nuevo_horario.hora_fin
+        reserva.hora_reserva_inicio = nueva_hora_inicio_obj
+        reserva.hora_reserva_fin = nueva_hora_fin_obj
         reserva.save()
-        
         messages.success(request, "La reserva se actualizó correctamente.")
         return redirect('detalle_reserva', reserva_id=reserva.id)
+    except ValueError:
+        messages.error(request, "El formato de las horas proporcionadas no es válido. Use el formato HH:MM.")
+        return redirect('detalle_reserva', reserva_id=reserva.id)
+    except Horario.DoesNotExist:
+        messages.error(request, "El horario seleccionado no existe para la cancha de la reserva.")
+        return redirect('detalle_reserva', reserva_id=reserva.id)
     except Exception as e:
-        messages.error(request, f"Ocurrió un error: {e}")
+        messages.error(request, f"Ocurrió un error al actualizar la reserva: {e}")
         return redirect('detalle_reserva', reserva_id=reserva.id)
 
 @never_cache
