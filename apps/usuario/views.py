@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.utils.timezone import now
 from django.contrib import messages
+from django.http import Http404
 from django.urls import reverse
 from rest_framework import viewsets
 from .serializer import UsuarioSerializer
@@ -236,10 +237,14 @@ def eliminar_cuenta(request):
 
 @login_required
 def mis_reservas(request):
-    reservas = Reserva.objects.filter(
-        usuario=request.user,
-        horario__dia__gte=now().date()
-    ).select_related('horario', 'horario__cancha').order_by('horario__dia', 'hora_reserva_inicio')
+    try:
+        reservas = Reserva.objects.filter(
+            usuario=request.user,
+            horario__dia__gte=now().date()
+        ).select_related('horario', 'horario__cancha').order_by('horario__dia', 'hora_reserva_inicio')
+    except Reserva.DoesNotExist:
+        messages.error(request, "No tienes reservas activas en este momento.")
+        return redirect('mis_reservas')
     
     contexto = {
         'reservas': reservas,
@@ -248,7 +253,12 @@ def mis_reservas(request):
 
 @login_required
 def mis_canchas(request):
-    canchas = Cancha.objects.filter(responsable=request.user).prefetch_related('direcciones')
+    try:
+        canchas = Cancha.objects.filter(responsable=request.user).prefetch_related('direcciones')
+    except Reserva.DoesNotExist:
+        messages.error(request, "No tienes canchas registradas.")
+        return redirect('mis_canchas')
+    
     contexto = {
         'canchas': canchas,
     }
