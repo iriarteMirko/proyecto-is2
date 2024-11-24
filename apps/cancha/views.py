@@ -83,10 +83,10 @@ def detalle_cancha(request, cancha_id, cancha_slug):
     contexto = {
         'cancha': cancha,
         'responsable': request.user == cancha.responsable,
+        'reseña': reseña,
         'calificacion': calificacion,
         'dias_horarios': dias_horarios,
-        'reseña': reseña,  # La reseña del usuario (si existe)
-        'horas': [time(hour=h).strftime('%H:%M') for h in range(24)],  # Horas de 00:00 a 23:59
+        'horas': [time(hour=h).strftime('%H:%M') for h in range(24)],
         'hoy': datetime.now().date().strftime('%Y-%m-%d'),
     }
     return render(request, 'cancha/detalle_cancha/detalle_cancha.html', contexto)
