@@ -6,7 +6,6 @@ from django.contrib.auth.models import Group
 class Cancha(models.Model):
     responsable = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='canchas')
     nombre = models.CharField('Nombre de la cancha', max_length=100, blank=False, null=False)
-    disponibilidad = models.BooleanField('Disponible', default=False, blank=False, null=False)
     imagen = models.ImageField('Imagen de la Cancha', upload_to='canchas/', blank=True, null=True)
     fecha_creacion = models.DateField(auto_now_add=True)
     ultima_modificacion = models.DateField(auto_now=True)
