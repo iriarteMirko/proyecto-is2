@@ -273,6 +273,24 @@ def editar_horarios_dia(request, cancha_id, cancha_slug):
             messages.error(request, "La hora de fin no puede superar las 23:59.")
             return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)
         
+        # Verificar reservas en conflicto
+        reservas_en_conflicto = []
+        for horario in horarios_existentes:
+            reservas = Reserva.objects.filter(horario=horario)
+            for reserva in reservas:
+                if reserva.hora_reserva_inicio < hora_inicio_dt or reserva.hora_reserva_fin > hora_fin_dt:
+                    reservas_en_conflicto.append(reserva)
+        
+        if reservas_en_conflicto:
+            reservas_detalle = ", ".join(
+                f"{reserva}" for reserva in reservas_en_conflicto
+            )
+            messages.error(
+                request, 
+                f"No se pueden modificar los horarios porque existen reservas en conflicto: \n{reservas_detalle}."
+            )
+            return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)
+        
         # Actualizar los horarios
         for horario in horarios_existentes:
             horario.hora_inicio = hora_inicio_dt
