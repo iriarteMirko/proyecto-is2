@@ -8,6 +8,7 @@ from .serializer import CanchaSerializer
 from apps.usuario.factory import CanchaConcreteFactory
 from apps.horario.models import Horario
 from apps.reserva.models import Reserva
+from apps.reseña.models import Reseña
 from .models import Cancha
 from datetime import timedelta, datetime, time
 from itertools import groupby
@@ -78,12 +79,13 @@ def detalle_cancha(request, cancha_id, cancha_slug):
     cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug)
     dias_horarios = obtener_dias_horarios(cancha)
     calificacion = cancha.promedio_calificaciones()
-    
+    reseña = Reseña.objects.filter(usuario=request.user, cancha=cancha).first()
     contexto = {
         'cancha': cancha,
         'responsable': request.user == cancha.responsable,
         'calificacion': calificacion,
         'dias_horarios': dias_horarios,
+        'reseña': reseña,  # La reseña del usuario (si existe)
         'horas': [time(hour=h).strftime('%H:%M') for h in range(24)],  # Horas de 00:00 a 23:59
         'hoy': datetime.now().date().strftime('%Y-%m-%d'),
     }
@@ -181,69 +183,66 @@ def editar_cancha(request, cancha_id, cancha_slug):
 @require_POST
 def cambiar_imagen(request):
     user = request.user
-    if request.method == 'POST':
-        imagen = request.FILES.get('imagen')
-        if imagen:
-            user.imagen = imagen
-            user.save()
-            messages.success(request, 'Imagen actualizada correctamente.')
-            return redirect('perfil', user.id, user.slug)
-        else:
-            user.imagen = 'usuarios/default-avatar.jpg'
-            user.save()
-            return redirect('perfil', user.id, user.slug)
+    imagen = request.FILES.get('imagen')
+    if imagen:
+        user.imagen = imagen
+        user.save()
+        messages.success(request, 'Imagen actualizada correctamente.')
+        return redirect('perfil', user.id, user.slug)
+    else:
+        user.imagen = 'usuarios/default-avatar.jpg'
+        user.save()
+        return redirect('perfil', user.id, user.slug)
 
 @login_required
 @require_POST
 def eliminar_cancha(request, cancha_id, cancha_slug):
     cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug, responsable=request.user)
-    if request.method == 'POST':
-        contraseña = request.POST.get('password')
-        if not request.user.check_password(contraseña):
-            messages.error(request, 'Contraseña incorrecta.')
-            return redirect('editar_cancha', cancha_id, cancha_slug)
-        cancha.delete()
-        messages.success(request, 'La cancha fue eliminada correctamente.')
-        return redirect('inicio')
+    contraseña = request.POST.get('password')
+    if not request.user.check_password(contraseña):
+        messages.error(request, 'Contraseña incorrecta.')
+        return redirect('editar_cancha', cancha_id, cancha_slug)
+    cancha.delete()
+    messages.success(request, 'La cancha fue eliminada correctamente.')
+    return redirect('inicio')
 
 @login_required
 @require_POST
 def agregar_horario(request, cancha_id, cancha_slug):
-    if request.method == 'POST':
-        cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug)
-        dia = request.POST.get('dia')
-        hora_inicio = request.POST.get('hora_inicio')
-        hora_fin = request.POST.get('hora_fin')
-        try:
-            ahora = datetime.now()
-            if isinstance(dia, str):
-                dia = datetime.strptime(dia, "%Y-%m-%d").date()
-            if isinstance(hora_inicio, str):
-                hora_inicio = datetime.strptime(hora_inicio, "%H:%M").time()
-            if isinstance(hora_fin, str):
-                hora_fin = datetime.strptime(hora_fin, "%H:%M").time()
-            
-            # Validar que el horario sea en una fecha y hora futuras
-            if dia < ahora.date() or (dia == ahora.date() and hora_inicio <= ahora.time()):
-                raise ValueError("El horario debe ser en una fecha y hora futuras.")
-            # Validar que hora de inicio debe ser antes de la hora de fin
-            if hora_inicio >= hora_fin:
-                raise ValueError("La hora de inicio debe ser menor que la hora de fin.")
-            # Validar que no exista un horario con el mismo dia y hora
-            if Horario.objects.filter(cancha_id=cancha_id, dia=dia).exists():
-                raise ValueError("Ya existe un horario para este día y cancha.")
-            
-            # Crear el horario
-            Horario.objects.create(
-                cancha=cancha,
-                dia=dia,
-                hora_inicio=hora_inicio,
-                hora_fin=hora_fin
-            )
-            messages.success(request, "Horario agregado exitosamente.")
-        except ValueError as e:
-            messages.error(request, str(e))
-        return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)
+    cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug)
+    dia = request.POST.get('dia')
+    hora_inicio = request.POST.get('hora_inicio')
+    hora_fin = request.POST.get('hora_fin')
+    try:
+        ahora = datetime.now()
+        if isinstance(dia, str):
+            dia = datetime.strptime(dia, "%Y-%m-%d").date()
+        if isinstance(hora_inicio, str):
+            hora_inicio = datetime.strptime(hora_inicio, "%H:%M").time()
+        if isinstance(hora_fin, str):
+            hora_fin = datetime.strptime(hora_fin, "%H:%M").time()
+        
+        # Validar que el horario sea en una fecha y hora futuras
+        if dia < ahora.date() or (dia == ahora.date() and hora_inicio <= ahora.time()):
+            raise ValueError("El horario debe ser en una fecha y hora futuras.")
+        # Validar que hora de inicio debe ser antes de la hora de fin
+        if hora_inicio >= hora_fin:
+            raise ValueError("La hora de inicio debe ser menor que la hora de fin.")
+        # Validar que no exista un horario con el mismo dia y hora
+        if Horario.objects.filter(cancha_id=cancha_id, dia=dia).exists():
+            raise ValueError("Ya existe un horario para este día y cancha.")
+        
+        # Crear el horario
+        Horario.objects.create(
+            cancha=cancha,
+            dia=dia,
+            hora_inicio=hora_inicio,
+            hora_fin=hora_fin
+        )
+        messages.success(request, "Horario agregado exitosamente.")
+    except ValueError as e:
+        messages.error(request, str(e))
+    return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)
 
 @login_required
 @require_POST
@@ -252,7 +251,6 @@ def editar_horarios_dia(request, cancha_id, cancha_slug):
     dia = request.POST.get('dia')
     hora_inicio = request.POST.get('hora_inicio')
     hora_fin = request.POST.get('hora_fin')
-    
     try:
         # Validación de existencia de horarios para el día seleccionado
         horarios_existentes = Horario.objects.filter(cancha=cancha, dia=dia)
@@ -309,7 +307,6 @@ def editar_horarios_dia(request, cancha_id, cancha_slug):
 def eliminar_horarios_dia(request, cancha_id, cancha_slug):
     cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug, responsable=request.user)
     dia = request.POST.get('dia')
-    
     try:
         # Eliminar todos los horarios asociados al día y a la cancha seleccionada
         horarios_eliminados = Horario.objects.filter(cancha=cancha, dia=dia).delete()
@@ -346,7 +343,6 @@ def detalle_horario(request, cancha_id, cancha_slug, horario_id, hora_inicio, ho
 def reservar_horario(request, cancha_id, cancha_slug, horario_id, hora_inicio, hora_fin):
     cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug)
     horario = get_object_or_404(Horario, id=horario_id, cancha=cancha)
-    
     try:
         hora_inicio_obj = hora_inicio if isinstance(hora_inicio, time) else time.fromisoformat(hora_inicio)
         hora_fin_obj = hora_fin if isinstance(hora_fin, time) else time.fromisoformat(hora_fin)
