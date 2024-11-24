@@ -183,21 +183,6 @@ def editar_cancha(request, cancha_id, cancha_slug):
 
 @login_required
 @require_POST
-def cambiar_imagen(request):
-    user = request.user
-    imagen = request.FILES.get('imagen')
-    if imagen:
-        user.imagen = imagen
-        user.save()
-        messages.success(request, 'Imagen actualizada correctamente.')
-        return redirect('perfil', user.id, user.slug)
-    else:
-        user.imagen = 'usuarios/default-avatar.jpg'
-        user.save()
-        return redirect('perfil', user.id, user.slug)
-
-@login_required
-@require_POST
 def eliminar_cancha(request, cancha_id, cancha_slug):
     cancha = get_object_or_404(Cancha, id=cancha_id, slug=cancha_slug, responsable=request.user)
     contraseña = request.POST.get('password')
