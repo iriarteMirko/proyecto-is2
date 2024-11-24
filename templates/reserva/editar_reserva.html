@@ -30,19 +30,30 @@
                             <div class="accordion-body">
                                 <div class="hour-grid d-flex flex-wrap">
                                     {% for hora in dia.horas %}
-                                    <a 
-                                        href="{% if hora.id and hora.estado == 'verde' %}{% url 'editar_reserva' reserva.id hora.id %}{% else %}#{% endif %}" 
-                                        class="hour-block {{ hora.estado }} m-2 text-decoration-none d-flex justify-content-center align-items-center"
+                                    <div 
+                                        class="hour-block {{ hora.estado }} m-2 text-decoration-none d-flex justify-content-center align-items-center {% if hora.id and hora.estado == 'verde' %}selectable{% endif %}"
+                                        data-horario-id="{{ hora.id }}"
+                                        data-hora-inicio="{{ hora.hora_inicio }}"
+                                        data-hora-fin="{{ hora.hora_fin }}"
                                         title="{{ hora.hora_inicio }} - {{ hora.hora_fin }}"
-                                        style="{% if not hora.id or hora.estado != 'verde' %}pointer-events: none;{% endif %}">
+                                        style="{% if not hora.id or hora.estado == 'gris' or hora.estado == 'rojo' or hora.hora_inicio == reserva.hora_reserva_inicio|time:'H:i' %} pointer-events: none;{% endif %}">
                                         <span class="text-white">{{ hora.hora_inicio }} - {{ hora.hora_fin }}</span>
-                                    </a>
+                                    </div>
                                     {% endfor %}
                                 </div>
                             </div>
                         </div>
                     </div>
                     {% endfor %}
+                </div>
+                <div class="text-center mt-4">
+                    <button 
+                        id="guardar-cambios-btn"
+                        type="button" 
+                        class="btn btn-success" 
+                        disabled>
+                        Guardar cambios
+                    </button>
                 </div>
             </div>
         </div>
@@ -67,6 +78,7 @@
         font-size: 12px;
         font-weight: bold;
         transition: transform 0.2s, box-shadow 0.2s;
+        border: 2px solid transparent;
     }
     .hour-block:hover {
         transform: scale(1.1);
@@ -85,11 +97,50 @@
         background-color: #f44336; 
         color: white;
     }
-    .btn-danger {
-        background-color: #f44336;
+    .hour-block.selectable:hover {
+        border-color: #FFC107; /* Resaltado al seleccionar */
+    }
+    .hour-block.selected {
+        border-color: #FFC107; 
+        transform: scale(1.2);
+    }
+    .btn-success {
+        background-color: #4CAF50;
         border: none;
     }
-    .btn-danger:hover {
-        background-color: #d32f2f;
+    .btn-success:disabled {
+        background-color: #d3d3d3;
+        cursor: not-allowed;
+    }
+    .btn-success:hover {
+        background-color: #45a049;
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const hourBlocks = document.querySelectorAll('.hour-block.selectable');
+        const guardarCambiosBtn = document.getElementById('guardar-cambios-btn');
+        let selectedBlock = null;
+
+        hourBlocks.forEach(block => {
+            block.addEventListener('click', function() {
+                if (selectedBlock) {
+                    selectedBlock.classList.remove('selected');
+                }
+                this.classList.add('selected');
+                selectedBlock = this;
+                guardarCambiosBtn.disabled = false;
+                guardarCambiosBtn.setAttribute('data-horario-id', this.getAttribute('data-horario-id'));
+            });
+        });
+
+        guardarCambiosBtn.addEventListener('click', function() {
+            const horarioId = this.getAttribute('data-horario-id');
+            if (horarioId) {
+                const url = `{% url 'editar_reserva' reserva.id 0 %}`.replace('/0/', `/${horarioId}/`);
+                window.location.href = url;
+            }
+        });
+    });
+</script>
