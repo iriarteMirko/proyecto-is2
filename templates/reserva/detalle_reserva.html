@@ -47,16 +47,21 @@
                         </li>
                     </ul>
                     <div class="d-flex justify-content-center">
-                        <form method="POST" action="{% url 'cancelar_reserva' reserva.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger">Cancelar reserva</button>
-                        </form>
+                        <button 
+                            class="btn btn-danger" 
+                            style="font-weight: bold;" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#modalCancelarReserva">
+                            Cancelar reserva
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </main>
+
+{% include "reserva/cancelar_reserva.html" %}
 
 {% include "base/message.html" %}
 
