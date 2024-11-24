@@ -5,7 +5,6 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from .serializer import ReseñaSerializer
 from .models import Reseña
-from .forms import ReseñaForm
 from apps.cancha.models import Cancha
 
 class ReseñaViewSet(viewsets.ModelViewSet):
@@ -26,15 +25,21 @@ def calificar_cancha(request, cancha_id):
         return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)
     
     if request.method == 'POST':
-        form = ReseñaForm(request.POST)
-        if form.is_valid():
-            reseña = form.save(commit=False)
-            reseña.usuario = request.user
-            reseña.cancha = cancha
-            reseña.save()
-            messages.success(request, "Gracias por calificar la cancha.")
+        calificacion = int(request.POST.get('calificacion', 0))
+        comentario = request.POST.get('comentario', '')
+        
+        if calificacion < 1 or calificacion > 5:
+            messages.error(request, "La calificación debe estar entre 1 y 5.")
             return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)
-    else:
-        form = ReseñaForm()
+        
+        # Crear la reseña
+        Reseña.objects.create(
+            usuario=request.user,
+            cancha=cancha,
+            calificacion=calificacion,
+            comentario=comentario
+        )
+        messages.success(request, "Gracias por calificar la cancha.")
+        return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)
     
-    return render(request, 'reseña/calificar_cancha.html', {'form': form, 'cancha': cancha})
+    return redirect('detalle_cancha', cancha_id=cancha.id, cancha_slug=cancha.slug)

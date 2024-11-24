@@ -20,8 +20,10 @@
                             {{ cancha.nombre }}
                         </h2>
                         {% if request.user.is_authenticated and request.user != cancha.responsable %}
-                            <a href="{% url 'calificar_cancha' cancha.id %}" class="btn btn-primary me-2">Calificar</a>
+                            <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#calificarModal">Calificar</button>
                         {% endif %}
+                        <!-- Modal de Calificación -->
+                        {% include "cancha/detalle_cancha/modal_reseña/calificar_cancha.html" %}
                         <a href="{% url 'inicio' %}" 
                             class="btn btn-secondary shadow-sm" 
                             style="background-color: #2C3E50; color: #fff; font-weight: bold;">
