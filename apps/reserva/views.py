@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views.decorators.cache import never_cache
-from django.utils.timezone import now
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect
 from django.contrib import messages
@@ -135,9 +134,6 @@ def editar_reserva(request, reserva_id, horario_id, nueva_hora_inicio_reserva, n
         reserva.hora_reserva_fin = nueva_hora_fin_obj
         reserva.save()
         messages.success(request, "La reserva se actualizó correctamente.")
-        return redirect('detalle_reserva', reserva_id=reserva.id)
-    except ValueError:
-        messages.error(request, "El formato de las horas proporcionadas no es válido. Use el formato HH:MM.")
         return redirect('detalle_reserva', reserva_id=reserva.id)
     except Horario.DoesNotExist:
         messages.error(request, "El horario seleccionado no existe para la cancha de la reserva.")
