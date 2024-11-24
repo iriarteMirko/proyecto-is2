@@ -9,7 +9,7 @@ from apps.usuario.factory import CanchaConcreteFactory
 from apps.horario.models import Horario
 from apps.reserva.models import Reserva
 from .models import Cancha
-from datetime import date, timedelta, datetime, time
+from datetime import timedelta, datetime, time
 from itertools import groupby
 from operator import attrgetter
 import re

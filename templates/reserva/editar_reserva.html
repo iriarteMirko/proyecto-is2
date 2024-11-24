@@ -1,0 +1,95 @@
+<div class="modal fade" id="modalEditarReserva" tabindex="-1" aria-labelledby="modalEditarReservaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarReservaLabel">Editar Reserva</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6 style="color: #4CAF50; font-weight: bold;">Selecciona un nuevo horario:</h6>
+                <hr>
+                <div class="accordion" id="accordionHorarios">
+                    {% for dia in dias_horarios %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                            <button 
+                                class="accordion-button collapsed" 
+                                type="button" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#collapse{{ forloop.counter }}" 
+                                aria-expanded="false" 
+                                aria-controls="collapse{{ forloop.counter }}">
+                                {{ dia.dia }}
+                            </button>
+                        </h2>
+                        <div 
+                            id="collapse{{ forloop.counter }}" 
+                            class="accordion-collapse collapse" 
+                            aria-labelledby="heading{{ forloop.counter }}" 
+                            data-bs-parent="#accordionHorarios">
+                            <div class="accordion-body">
+                                <div class="hour-grid d-flex flex-wrap">
+                                    {% for hora in dia.horas %}
+                                    <a 
+                                        href="{% if hora.id and hora.estado == 'verde' %}{% url 'editar_reserva' reserva.id hora.id %}{% else %}#{% endif %}" 
+                                        class="hour-block {{ hora.estado }} m-2 text-decoration-none d-flex justify-content-center align-items-center"
+                                        title="{{ hora.hora_inicio }} - {{ hora.hora_fin }}"
+                                        style="{% if not hora.id or hora.estado != 'verde' %}pointer-events: none;{% endif %}">
+                                        <span class="text-white">{{ hora.hora_inicio }} - {{ hora.hora_fin }}</span>
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hour-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+    .hour-block {
+        width: 100px;
+        height: 50px;
+        margin: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 5px;
+        text-align: center;
+        font-size: 12px;
+        font-weight: bold;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .hour-block:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+    }
+    .hour-block.gris {
+        background-color: #d3d3d3; 
+        color: black;
+    }
+    .hour-block.verde {
+        background-color: #4caf50; 
+        color: white;
+    }
+    .hour-block.rojo {
+        background-color: #f44336; 
+        color: white;
+    }
+    .btn-danger {
+        background-color: #f44336;
+        border: none;
+    }
+    .btn-danger:hover {
+        background-color: #d32f2f;
+    }
+</style>

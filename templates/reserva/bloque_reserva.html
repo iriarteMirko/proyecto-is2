@@ -10,13 +10,13 @@
                     {{ reserva.horario.cancha.nombre }}
                 </h5>
                 <p class="card-text">
-                    <strong>Fecha:</strong> {{ reserva.horario.dia|date:"M. d, Y" }}
+                    <strong>Fecha reservada:</strong> {{ reserva.horario.dia|date:"M. d, Y" }}
                 </p>
                 <p class="card-text">
                     <strong>Horario:</strong> {{ reserva.hora_reserva_inicio|time:"g:i a" }} - {{ reserva.hora_reserva_fin|time:"g:i a" }}
                 </p>
                 <p class="card-text">
-                    <strong>Reservado el:</strong> {{ reserva.fecha_reserva|date:"M. d, Y" }}
+                    <strong>Fecha de reserva:</strong> {{ reserva.fecha_reserva|date:"M. d, Y" }}
                 </p>
             </div>
         </div>
