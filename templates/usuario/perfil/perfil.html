@@ -5,7 +5,11 @@
 <main class="container p-5">
     <div class="row">
         <div class="col-lg-12 text-center mb-4">
-            <h2 class="display-5" style="color: #4CAF50; font-weight: bold;">Mi Perfil</h2>
+            {% if user == request.user %}
+                <h2 class="display-5" style="color: #4CAF50; font-weight: bold;">Mi Perfil</h2>
+            {% else %}
+            <h2 class="display-5" style="color: #4CAF50; font-weight: bold;">Perfil de {{ user }}</h2>
+            {% endif %}
         </div>
     </div>
     <div class="row justify-content-center">
