@@ -9,7 +9,7 @@
                     <strong>
                         <a href="{% url 'perfil' reseña.usuario.id reseña.usuario.slug %}" 
                             class="text-decoration-none fw text-primary d-inline-flex align-items-center">
-                            <span class="me-1" style="color: #F1C40F;">{{ reseña.usuario }}</span>
+                            <span class="me-1" style="color: #F1C40F; font-size: 1.25rem;">{{ reseña.usuario }}</span>
                             <i class="bi bi-person-circle" style="color: #F1C40F;"></i>
                         </a>
                     </strong>
@@ -23,7 +23,7 @@
                         {% endfor %}
                     </div>
                 </div>
-                <p class="mt-2 mb-0" style="color: #4CAF50;">Comentario:</p>
+                <p class="mt-2 mb-0" style="color: #4CAF50; font-weight: bold;">Comentario:</p>
                 <p class="mb-0">{{ reseña.comentario|default:"Sin comentario" }}</p>
             </div>
             {% endfor %}
