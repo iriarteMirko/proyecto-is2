@@ -1,5 +1,5 @@
 <div class="d-flex justify-content-between align-items-center">
-    <h4 style="color: #2C3E50; font-weight: bold;">Información de la Cancha</h4>
+    <h4 style="color: #2C3E50; font-weight: bold;">Información de {{cancha}}</h4>
     {% if responsable %}
     <a href="{% url 'editar_cancha' cancha.id cancha.slug %}" 
         class="btn btn-warning shadow-sm ms-2" 

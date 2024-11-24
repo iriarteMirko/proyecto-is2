@@ -80,10 +80,12 @@ def detalle_cancha(request, cancha_id, cancha_slug):
     dias_horarios = obtener_dias_horarios(cancha)
     calificacion = cancha.promedio_calificaciones()
     reseña = Reseña.objects.filter(usuario=request.user, cancha=cancha).first()
+    reseñas = Reseña.objects.filter(cancha=cancha).order_by('-id')
     contexto = {
         'cancha': cancha,
         'responsable': request.user == cancha.responsable,
         'reseña': reseña,
+        'reseñas': reseñas,
         'calificacion': calificacion,
         'dias_horarios': dias_horarios,
         'horas': [time(hour=h).strftime('%H:%M') for h in range(24)],
