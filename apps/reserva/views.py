@@ -1,13 +1,19 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.views.decorators.cache import never_cache
+from django.utils.timezone import now
+from django.urls import reverse
+from django.http import Http404
+from django.contrib import messages
 from django.core.exceptions import ValidationError
+from django.http import HttpResponseRedirect
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .serializer import ReservaSerializer
 from .models import Reserva
 
-# ViewSet para la API REST
 class ReservaViewSet(viewsets.ModelViewSet):
     serializer_class = ReservaSerializer
     queryset = Reserva.objects.all()
@@ -36,9 +42,40 @@ class ReservaViewSet(viewsets.ModelViewSet):
 
 @login_required
 def mis_reservas(request):
-    reservas = Reserva.objects.filter(usuario=request.user).select_related('horario', 'horario__cancha')
+    reservas = Reserva.objects.filter(
+        usuario=request.user,
+        horario__dia__gte=now().date()
+    ).select_related('horario', 'horario__cancha').order_by('horario__dia', 'hora_reserva_inicio')
     
     contexto = {
         'reservas': reservas,
     }
-    return render(request, 'reservas/mis_reservas.html', contexto)
+    return render(request, 'reserva/mis_reservas.html', contexto)
+
+@never_cache
+@login_required
+def detalle_reserva(request, reserva_id):
+    try:
+        reserva = Reserva.objects.get(id=reserva_id, usuario=request.user)
+    except Reserva.DoesNotExist:
+        messages.error(request, "La reserva que intentas ver ya no existe.")
+        return redirect('mis_reservas')
+    
+    contexto = {
+        'reserva': reserva,
+    }
+    return render(request, 'reserva/detalle_reserva.html', contexto)
+
+@never_cache
+@login_required
+@require_POST
+def cancelar_reserva(request, reserva_id):
+    try:
+        reserva = Reserva.objects.get(id=reserva_id, usuario=request.user)
+    except Reserva.DoesNotExist:
+        messages.error(request, "La reserva que intentas ver ya no existe.")
+        return redirect('mis_reservas')
+    
+    reserva.delete()
+    messages.success(request, "Reserva cancelada exitosamente.")
+    return HttpResponseRedirect(reverse('mis_reservas'))
