@@ -21,18 +21,15 @@ class UsuarioViewSet(viewsets.ModelViewSet):
 
 def inicio(request):
     canchas = Cancha.objects.prefetch_related('direcciones').all()
-    
-    lista_canchas = []
-    for cancha in canchas:
-        calificacion = cancha.promedio_calificaciones()
-        lista_canchas.append({'cancha': cancha, 'calificacion': calificacion})
-    
     query = request.GET.get('q', '')
     distrito = request.GET.get('distrito', '')
+    
     if query:
         canchas = canchas.filter(nombre__icontains=query)
     if distrito:
         canchas = canchas.filter(direcciones__distrito=distrito)
+    
+    lista_canchas = [{'cancha': cancha, 'calificacion': cancha.promedio_calificaciones()} for cancha in canchas]
     
     contexto = {
         'canchas': lista_canchas,
